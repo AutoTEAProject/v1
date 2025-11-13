@@ -11,6 +11,13 @@ git clone https://github.com/AutoTEAProject/v1.git
 git pull
 ```
 
+- 초기 환경설정
+```
+pip install pandas
+pip install openpyxl
+```
+
+
 ## 사용 메뉴얼
 - 현재 raw material에 대한 데이터가 상당히 부족합니다. 데이터에 없는 물질이 들어오면 에러가 발생하는데 해당 물질에 대한 데이터를 parse/Calc.py파일의 lawMaterialCostData, lawMaterialWeightData 딕셔너리에 추가하면 됩니다.
 - 또한 현재 프로그램을 처음 실행하면 파이썬 가상환경 경로 출력 메세지때문에 입력값이 멋대로 들어가는 버그가 있어서 처음 실행은 Ctrl + C로 중단시키고 두 번째 실행부터는 정상 동작하니 사용하시면 됩니다.

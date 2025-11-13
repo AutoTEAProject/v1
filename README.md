@@ -26,4 +26,4 @@ git pull
 - Aspen에서 계산되어있는 Equipment cost가 있는 경우 해당 값을 우선으로 사용하도록 변경할 예정입니다.
 
 ## git branch 배우는 사이트
-[https://learngitbranching.js.org/?locale=ko](깃게임)
+https://learngitbranching.js.org/?locale=ko

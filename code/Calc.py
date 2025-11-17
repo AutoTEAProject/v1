@@ -1,5 +1,24 @@
 from Utility import checkType
 
+lawMaterialCostData = {
+	'H2': 5, #USD/kg
+	'N2': 2, #USD/kg
+	'O2': 0.08, #USD/kg
+	'CH4': 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
+	'MEOH': 5, #USD/kg -> 이거 가격 확인 필요
+	'H2O': 0.00053 #USD/kg
+}
+
+lawMaterialWeightData = {
+	'H2': 2.016, #g/mol
+	'N2': 28.014, #g/mol
+	'O2': 32.00, #g/mol
+	'CH4': 16.04, #g/mol
+	'MEOH': 32.04, #g/mol
+	'H2O': 18.015, #g/mol
+	'NH3': 17.031 #g/mol
+}
+
 def calCAPEX(cost, CAPEX):
 	#CAPEX 출력 순서 지정을 위한 전방선언
 	CAPEX["CAPEX"] = ""
@@ -112,24 +131,6 @@ def calUtility(utility):
 			annualCost = annualUsage * electricityCostPerKWH #USD/year
 			utility[key]["ELECTRICITY UTILITY ANNUAL COST [USD/year]"] = int(annualCost)
 
-lawMaterialCostData = {
-	'H2': 5, #USD/kg
-	'N2': 2, #USD/kg
-	'O2': 0.08, #USD/kg
-	'CH4': 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'MEOH': 5, #USD/kg -> 이거 가격 확인 필요
-	'H2O': 0.00053 #USD/kg
-}
-
-lawMaterialWeightData = {
-	'H2': 2.016, #g/mol
-	'N2': 28.014, #g/mol
-	'O2': 32.00, #g/mol
-	'CH4': 16.04, #g/mol
-	'MEOH': 32.04, #g/mol
-	'H2O': 18.015, #g/mol
-	'NH3': 17.031 #g/mol
-}
 
 def calOPEX(CAPEX, lawMaterialData, OPEX, utility):
 	coolingWaterPrice = 0.00053 #USD/kg

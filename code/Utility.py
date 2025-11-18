@@ -5,31 +5,7 @@ import pandas as pd
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.styles import Font
-
-### 파라미터 값 초기화 부분 ###
-
-HeaterParam = {
-	"Diphenyl heater" : {"K1": 2.2628, "K2": 0.8581, "K3": 0.0003} ,
-	"Molten salt heater" : {"K1": 1.1979, "K2": 1.4782, "K3": -0.0958} ,
-	"Hot water heater" : {"K1": 2.0829, "K2": 0.9074, "K3": -0.0243} ,
-	"Steam boiler" : {"K1": 6.9617, "K2": -1.48, "K3": 0.3161} 
-}
-
-HeatExchangerParam = {
-	"Fixed tube" : {"K1": 4.3247, "K2": -0.303, "K3": 0.1634},
-	"Floating head" : {"K1": 4.8306, "K2": -0.8509, "K3": 0.3187},
-	"U-tube" : {"K1": 4.1884, "K2": -0.2503, "K3": 0.1974},
-	"Bayonet" : {"K1": 4.2768, "K2": -0.0495, "K3": 0.1431}
-}
-
-CompressorParam = {
-	"Centrifugal, axial and reciprocating" : {"K1": 2.2891, "K2": 1.3604, "K3": -0.1027},
-	"Rotary" : {"K1": 5.0355, "K2": -1.8002, "K3": 0.8253}
-}
-ReactParam = {
-	"Nan" : {"K1": 0, "K2": 0, "K3": 0}
-}
-# Reactor의 입력 방식은 다시 생각해보자.
+from data import HeaterParam, HeatExchangerParam, CompressorParam, ReactParam
 
 def checkType(name):
 	length = len(name)
@@ -94,9 +70,6 @@ def calEquipmentCost(inputData, cost, utility): #react도 추가해야함.
 		- HEX, HTX : EQUIPMENT COST * (B1 + B2*FM)
 		'''
 		if (type == "HTX"):
-			# print(inputData[i][Index.NameIdx])
-			# print(utility[inputData[i][Index.NameIdx]])
-			
 			if ("HOT UTILITY[kW]" in utility[inputData[i][Index.NameIdx]]):
 				utilityKey = "HOT UTILITY[kW]"
 			elif ("ELECTRICITY UTILITY[kW]" in utility[inputData[i][Index.NameIdx]]):
@@ -104,8 +77,9 @@ def calEquipmentCost(inputData, cost, utility): #react도 추가해야함.
 			else:
 				utilityKey = "COOLING UTILITY[kg/hr]"
 			if(utility[inputData[i][Index.NameIdx]][utilityKey] < 0):
+				# error 이거 어떻게 처리해야하는거지?
+				# 이거 cooler라서 양수 전환해서 계산해야함
 				continue
-			# error 이거 어떻게 처리해야하는거지?
 			temp["Diphenyl heater"] = deepcopy(HeaterParam["Diphenyl heater"])
 			temp["Diphenyl heater"]["EQUIPMENT COST"] = ((10**(temp["Diphenyl heater"]["K1"]+temp["Diphenyl heater"]["K2"]+temp["Diphenyl heater"]["K3"]))*(utility[inputData[i][Index.NameIdx]][utilityKey] / 10)**(0.6)) * (798.8 / 397)
 			
@@ -117,7 +91,6 @@ def calEquipmentCost(inputData, cost, utility): #react도 추가해야함.
 			
 			temp["Steam boiler"] = deepcopy(HeaterParam["Steam boiler"])
 			temp["Steam boiler"]["EQUIPMENT COST"] = ((10**(temp["Steam boiler"]["K1"]+temp["Steam boiler"]["K2"]+temp["Steam boiler"]["K3"]))*(utility[inputData[i][Index.NameIdx]][utilityKey] / 10)**(0.6)) * (798.8 / 397)
-			# temp["C_BM"] = temp["EQUIPMENT COST"] * (temp["B1"] + temp["B2"] * temp["FM"])
 		elif (type == "HEX"):
 			temp["Fixed tube"] = deepcopy(HeatExchangerParam["Fixed tube"])
 			temp["Fixed tube"]["EQUIPMENT COST"] = ((10**(temp["Fixed tube"]["K1"]+temp["Fixed tube"]["K2"]+temp["Fixed tube"]["K3"]))*(inputData[i][Index.HeatTransferAreaIdx] / 10)**(0.6)) * (798.8 / 397)
@@ -133,7 +106,6 @@ def calEquipmentCost(inputData, cost, utility): #react도 추가해야함.
 		elif (type == "COMP"):
 			temp["Centrifugal, axial and reciprocating"] = deepcopy(CompressorParam["Centrifugal, axial and reciprocating"])
 			if (inputData[i][Index.DriverPowerIdx] == 0):
-				# print("Compressor ", inputData[i][Index.NameIdx], " has 0 power value. Please check the input.")
 				continue
 				#error
 				# 나중에 여기에 에러 처리 코드 넣기

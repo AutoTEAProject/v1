@@ -69,7 +69,7 @@ def calEquipmentCost(inputData, cost, utility): #react도 추가해야함.
 		2. C_BM 
 		- HEX, HTX : EQUIPMENT COST * (B1 + B2*FM)
 		'''
-		if (type == "HTX"):
+		if (type == "HTX" or type == "COOL"):
 			if ("HOT UTILITY[kW]" in utility[inputData[i][Index.NameIdx]]):
 				utilityKey = "HOT UTILITY[kW]"
 			elif ("ELECTRICITY UTILITY[kW]" in utility[inputData[i][Index.NameIdx]]):

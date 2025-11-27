@@ -37,12 +37,14 @@ def parseLawMaterial(filename, lawMaterialData):
 		if 'CONVENTIONAL COMPONENTS' in line:
 			inBlock = True
 			continue
+		if (inBlock and "ASPEN PLUS" in line):
+			inBlock = False
 		if inBlock and 'TOTAL BALANCE' in line:
 			return (lawMaterialData)
 		if inBlock:
 			line = line.strip()
 			parts = line.split()
-			if len(parts) > 4 and float(parts[3]) != 0.0:
+			if len(parts) == 5 and float(parts[3]) != 0.0:
 				if float(parts[3]) < 0 : 
 					print("%s 물질이 투입물이 맞습니까? (y/n) :" % parts[0], end='')
 					answer = input()
@@ -84,6 +86,7 @@ def parseTEA(filename, inputData):
 		temp[Index.DriverPowerIdx] = 0.0
 		# 이거 없는 경우는 .rep에서 COMP의 "RATE OF CONSUMPTION" 이거 가져오면 됨. 근데 이 데이터 rep 말고 xml 있으면 더 편할 것 같음.
 		inputData.append(temp)
+	print(inputData)
 	return (inputData)
 
 # 이제 REACT, HTX, HEX, COMP. FLASH, MIX 이렇게 종류별로 저장해둬야함

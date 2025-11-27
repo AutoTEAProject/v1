@@ -4,7 +4,8 @@ lawMaterialCostData = {
 	'O2': 0.08, #USD/kg
 	'CH4': 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
 	'MEOH': 5, #USD/kg -> 이거 가격 확인 필요
-	'H2O': 0.00053 #USD/kg
+	'H2O': 0.00053, #USD/kg
+	'CO2': 0.0558 #USD/kg
 }
 
 lawMaterialWeightData = {
@@ -14,7 +15,8 @@ lawMaterialWeightData = {
 	'CH4': 16.04, #g/mol
 	'MEOH': 32.04, #g/mol
 	'H2O': 18.015, #g/mol
-	'NH3': 17.031 #g/mol
+	'NH3': 17.031, #g/mol
+	'CO2': 44.01 #g/mol
 }
 
 utilityCostData = {

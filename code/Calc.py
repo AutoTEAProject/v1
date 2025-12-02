@@ -1,7 +1,8 @@
 from Utility import checkType
 from data import lawMaterialCostData, lawMaterialWeightData, utilityCostData, calcOPEXdata, profitAnalysisData
+from enums import Index
 
-def calCAPEX(cost, CAPEX):
+def calCAPEX(inputData, cost, CAPEX):
 	#CAPEX 출력 순서 지정을 위한 전방선언
 	CAPEX["CAPEX"] = ""
 	CAPEX[" "] = ""
@@ -42,16 +43,22 @@ def calCAPEX(cost, CAPEX):
  
 	CAPEX["Total capital investment (Capex)"] = 0
 	CAPEX["Annualized capital cost (r=5%, t=30 year)"] = 0
- 
+	# print(cost)
 	for key in cost:
-		if (checkType(key) == "REACT"):
+		# print(key + " " + inputData[key]["Type"])
+		if ("ATEA" in cost[key]):
+			CAPEX["Equipment cost"] += int(cost[key]["ATEA"]["EQUIPMENT COST"])
+			continue;
+		if (inputData[key]["Type"] == "REACT"):
 			CAPEX["Equipment cost"] += int(cost[key]["input"]["EQUIPMENT COST"])
-		elif(checkType(key) == "HEX"):
+		elif(inputData[key]["Type"] == "HEX"):
 			CAPEX["Equipment cost"] += int(cost[key]["U-tube"]["EQUIPMENT COST"])
-		elif(checkType(key) == "HTX"):
+		elif(inputData[key]["Type"] == "HTX"):
 			CAPEX["Equipment cost"] += int(cost[key]["Hot water heater"]["EQUIPMENT COST"])
-		elif(checkType(key) == "COMP"):
+		elif(inputData[key]["Type"] == "COMP"):
 			CAPEX["Equipment cost"] += int(cost[key]["Centrifugal, axial and reciprocating"]["EQUIPMENT COST"])
+		elif(inputData[key]["Type"] == "FLASH"):
+			CAPEX["Equipment cost"] += int(cost[key]["ATEA"]["EQUIPMENT COST"])
 	CAPEX["Fixed capital investment (FCI)"] = CAPEX["Equipment cost"] * 100 / 40
 	CAPEX["Start up cost (SUC)"] = CAPEX["Fixed capital investment (FCI)"] * 0.1
 
@@ -79,10 +86,11 @@ def calCAPEX(cost, CAPEX):
 	CAPEX["Annualized capital cost (r=5%, t=30 year)"] = CAPEX["Total capital investment (Capex)"] / ((1 - (1 / ((1.05)**30)))/0.05)
 
 def calUtility(utility):
-
 	for key in utility:
 		if "COOLING UTILITY[kg/hr]" in utility[key]:
 			usage = utility[key]["COOLING UTILITY[kg/hr]"]
+			if (usage < 0):
+				usage = -1 * usage
 			annualUsage = usage * calcOPEXdata["plantOperationHours"] #kg/year
 			utility[key]["COOLING UTILITY ANNUAL USAGE [kg/year]"] = int(annualUsage)
 			utilityCost = usage * utilityCostData["CoolingWaterPrice"] #USD/hr
@@ -92,6 +100,8 @@ def calUtility(utility):
 
 		if "HOT UTILITY[kW]" in utility[key]:
 			duty = utility[key]["HOT UTILITY[kW]"]
+			if (duty < 0):
+				duty = -1 * duty
 			annualDuty = duty * calcOPEXdata["plantOperationHours"] #kWh/year
 			utility[key]["HOT UTILITY ANNUAL DUTY [kWh/year]"] = int(annualDuty)
 			annualCost = annualDuty * utilityCostData["NGprice"]  #USD/year

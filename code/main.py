@@ -1,9 +1,9 @@
 #!/opt/anaconda3/envs/myenv/bin/python
-from Parse import parseTEA, parseHEX, parseCOMP, parseCAPCOSTParam, parseUtility, parseLawMaterial
+from Parse import parseTEA, parseHEX, parseCOMP, parseCAPCOSTParam, parseUtility, parseLawMaterial, parseEQUIP
 from Utility import calEquipmentCost, printout, inputRTX
 from Calc import calCAPEX, calUtility, calOPEX, calProfitAnalysis
 
-inputData = []
+inputData = {}
 inputfile = "./input/input.xlsx"
 inputrep = "./input/input.rep"
 lawMaterialData = {}
@@ -15,24 +15,25 @@ profitAnalysis = {}
 
 try: 
 	parseTEA(inputfile, inputData)
+	parseEQUIP(inputrep, inputData)
 	parseHEX(inputfile, inputData)
 	parseCOMP(inputfile, inputData)
 	parseCAPCOSTParam(inputrep, inputData)
+
 except Exception as e:
 	print("Error parsexlxs:", e)
 
 try: 
 	parseLawMaterial(inputrep, lawMaterialData) #KMOL/HR 단위로 추출  {'H2': -1841.32, 'N2': -613.773, 'NH3': 1227.55}
-	parseUtility(inputrep, utility)
+	parseUtility(inputData, inputrep, utility)
 	calEquipmentCost(inputData, cost, utility)
 
 except Exception as e:
 	print("Error parserep:", e)
 
 try:
-	inputRTX(cost)
-
-	calCAPEX(cost, CAPEX)
+	inputRTX(inputData, cost)
+	calCAPEX(inputData, cost, CAPEX)
 	calUtility(utility)
 	calOPEX(CAPEX, lawMaterialData, OPEX, utility)
 	calProfitAnalysis(CAPEX, OPEX, profitAnalysis, lawMaterialData)

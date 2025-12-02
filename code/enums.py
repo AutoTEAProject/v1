@@ -19,7 +19,6 @@ class Index(IntEnum):
 	C3 = 9
 	FBM = 10
 	
-	NameIdx = 0
 	EquipmentCostIdx = 1
 	InstalledCostIdx = 2
 	EquipmentWeightIdx = 3
@@ -27,3 +26,4 @@ class Index(IntEnum):
 	UtilityCostIdx = 5
 	HeatTransferAreaIdx = 6
 	DriverPowerIdx = 7
+	TypeIdx = 8

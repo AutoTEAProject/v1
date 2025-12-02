@@ -71,22 +71,20 @@ def parseTEA(filename, inputData):
 	df = pd.read_excel(io = filename, sheet_name='Unit operation', usecols='C:H', header=3, engine='openpyxl')
 	# 이 시트 세로열은 C:H가 고정이다. -> 5개의 value 가져오는게 고정이라서.
 	for i in range(0, len(df), 1): #C랑 C++에 익숙해 2차원 딕셔너리를 생각을 못 했다 이게 더 간단할듯 근데 그거나 그거나 비슷함
-		temp = [0 for K in range(8)] # 저장할 데이터 길이가 8이다.
-		if (isinstance(df.iat[i, Index.NameIdx], datetime.datetime)):
+		temp = {} # 저장할 데이터 길이가 8이다.
+		NameIdx = 0;
+		if (isinstance(df.iat[i, NameIdx], datetime.datetime)):
 			continue
-		temp[Index.NameIdx] = df.iat[i, Index.NameIdx]
-		temp[Index.EquipmentCostIdx] = float(df.iat[i, Index.EquipmentCostIdx]) # type 확인해서 <class 'numpy.int64'>면 int로, <class 'numpy.float64'>면 float으로 형변환하면 더 좋다.
-		temp[Index.InstalledCostIdx] = float(df.iat[i, Index.InstalledCostIdx])
-		temp[Index.EquipmentWeightIdx] = float(df.iat[i, Index.EquipmentWeightIdx])
-		temp[Index.InstalledWeightIdx] = float(df.iat[i, Index.InstalledWeightIdx])
-		temp[Index.UtilityCostIdx] = float(df.iat[i, Index.UtilityCostIdx])
-		temp[Index.HeatTransferAreaIdx] = 0.0 
-		#-> 이거 없는 경우 파싱 다른 곳에서 해서 가져와야함 HTX는 "RATE OF CONSUMPTION"  이거 찾아서 가져오면 됨
-		# HEX는 "ZONE HEAT TRANSFER AND AREA" 에서 AREA 값 가져오면 됨
-		temp[Index.DriverPowerIdx] = 0.0
-		# 이거 없는 경우는 .rep에서 COMP의 "RATE OF CONSUMPTION" 이거 가져오면 됨. 근데 이 데이터 rep 말고 xml 있으면 더 편할 것 같음.
-		inputData.append(temp)
-	print(inputData)
+		temp["Name"] = df.iat[i, NameIdx]
+		temp["EquipmentCost"] = float(df.iat[i, Index.EquipmentCostIdx]) # type 확인해서 <class 'numpy.int64'>면 int로, <class 'numpy.float64'>면 float으로 형변환하면 더 좋다.
+		temp["InstalledCost"] = float(df.iat[i, Index.InstalledCostIdx])
+		temp["EquipmentWeight"] = float(df.iat[i, Index.EquipmentWeightIdx])
+		temp["InstalledWeight"] = float(df.iat[i, Index.InstalledWeightIdx])
+		temp["UtilityCost"] = float(df.iat[i, Index.UtilityCostIdx])
+		temp["HeatTransferArea"] = 0.0 
+		temp["DriverPower"] = 0.0
+		temp["Type"] = ""
+		inputData[df.iat[i, NameIdx]] = temp
 	return (inputData)
 
 # 이제 REACT, HTX, HEX, COMP. FLASH, MIX 이렇게 종류별로 저장해둬야함
@@ -102,10 +100,10 @@ def parseHEX(filename, inputData):
 	for i in range(0, length):
 		name = df.iat[1, i]
 		area = df.iat[8, i]
-		for j in range(0, len(inputData)):
-			if (inputData[j][Index.NameIdx] == name):
+		for key in inputData:
+			if (inputData[key]["Name"] == name):
 				if (area != "nan"):
-					inputData[j][Index.HeatTransferAreaIdx] = float(area) 
+					inputData[key]["HeatTransferArea"] = float(area) 
 	    			# HTX는 이 값으로 구하는 거 아니라서 변경해야함.Capacity (kW)를 활용함.. 또 쿨러는 뭔가 다른 것 같은데.. 우선 계산된 값은 건드리지 말자.
 				break
 
@@ -119,10 +117,10 @@ def parseCOMP(filename, inputData):
 		name = df.iat[1, i]
 		area = df.iat[8, i]
 		power = df.iat[14, i]
-		for j in range(0, len(inputData)):
-			if (inputData[j][Index.NameIdx] == name):
+		for key in inputData:
+			if (inputData[key]["Name"] == name):
 				if (area != "nan"):
-					inputData[j][Index.DriverPowerIdx] = float(power)
+					inputData[key]["DriverPower"] = float(power)
 				break
 
 
@@ -141,19 +139,32 @@ def parseCAPCOSTParam(refFilename, inputData):
 			temp = list(line.split())
 			temp3 = list(temp[3].split('+'))
 			rate = float(temp3[0])
-			# if (rate == 0):
-			# 	print(line)
 			if (len(temp3) > 1):
 				for i in range(0, int(temp3[1])):
 					rate *=  10
-			for i in range(0, len(inputData)):
-				if (inputData[i][Index.NameIdx] == name):
-					if (checkType(name) == "HTX"):
-						inputData[i][Index.HeatTransferAreaIdx] = rate
-					elif (checkType(name) == "COMP"):
-						inputData[i][Index.DriverPowerIdx] = rate
-  
- 
+			for key in inputData:
+				if (inputData[key]["Name"] == name):
+					if (inputData[key]["Type"] == "HTX"):
+						inputData[key]["HeatTransferArea"] = rate
+					elif (inputData[key]["Type"] == "COMP"):
+						inputData[key]["DriverPower"] = rate
+
+def parseEQUIP(refFilename, inputData):
+	fd = open(refFilename, mode='r')
+	lines = fd.readlines()
+	flag = False
+
+	for line in lines:
+		if ("TABLE OF CONTENTS" in line):
+			flag = True
+		if ("  BLOCK:" in line):
+			temp = list(line.split())
+			temp2 = temp[3].split(".")
+			parseName = temp[1]
+			blockType = temp2[0]
+			for key in inputData:
+				if (key == parseName):
+					inputData[key]["Type"] = checkType(blockType)
 
 '''
 	이제 Utility값 파싱해서 저장하는 부분
@@ -204,8 +215,7 @@ def parseCAPCOSTParam(refFilename, inputData):
     -> 이제 이걸로 Utility값 읽어와서 파일에 출력하면 끝
 '''
 
-# utility =  {}
-def	parseUtility(repfFileName, utility):
+def	parseUtility(inputData, repfFileName, utility):
 	fd = open(repfFileName, mode='r')
 	lines = fd.readlines()
 	parseflag = 1
@@ -215,19 +225,27 @@ def	parseUtility(repfFileName, utility):
 			temp2 = temp[1].split(": ")
 			temp2 = temp2[0].split(" ")
 			name = temp2[0]
-			if (checkType(name) == "HEX"):
-				parseflag = 0
-			else:
-				parseflag = 1
+			print(name)
+			for key in inputData:
+				if (inputData[key]["Name"] == name):
+					if (inputData[key]["Type"] == "COMP"):
+						if (inputData[key]["DriverPower"] > 0):
+							utility[name] = {
+								"ELECTRICITY UTILITY[kW]": inputData[key]["DriverPower"]
+							}
+					# error
+					# COMP TEA에서 계산해주면 그걸 우선으로 사용
+					if (name == "HEX"):
+						parseflag = 0
+					else:
+						parseflag = 1
 		if ("UTILITY ID FOR WATER" in line):
 			parseflag = 2
 		if ("UTILITY ID FOR ELECTRICITY" in line):
 			parseflag = 3
 	
 		if ((parseflag == 2 or parseflag == 3)and "RATE OF CONSUMPTION" in line):
-			# print(line)
 			temp = list(line.split())
-			# print(temp)
 			temp3 = list(temp[3].split('+'))
 			num = float(temp3[0])
 			if (len(temp3) > 1):
@@ -264,8 +282,6 @@ def	parseUtility(repfFileName, utility):
 			utility[name] = {
 				"HOT UTILITY[kW]":num
 			}
-			# print(name)
-			# print(utility[name])
 
 
 #이제 예쁘게 출력만 하면 완성이다~

@@ -7,7 +7,9 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.styles import Font
 from data import HeaterParam, HeatExchangerParam, CompressorParam, ReactParam
 
-def checkType(name):
+# RGIBBS, FLASH2, RADFRAC, RSTOIC, FSPLIT, FLASH3, DUPL, VALVE, HEATER, COMPR, HEATX, MIXER
+
+def checkType(name): #-> 이 부분 전면 수정해야할듯
 	length = len(name)
 	NGLen = 2
 	HTXLen = 3
@@ -19,15 +21,23 @@ def checkType(name):
 	COOLLen = 4
 	SPFRLen = 4
 	DISTLen = 4
+	HEATXLen = 5
 	REACTLen = 5
 	FLASHLen = 5
 	VALVELen = 5
 	SPLITLen = 5
+	HEATERLen = 6
+	RGIBBSLen = 6
+	RSTOICLen = 6
+	RADFRACLen = 7
+	DUPLLen = 4
 	
 	for i in range(0, length):
 		if (length - i >= NGLen and name[i:i + NGLen] == "NG"):
 			return "HTX"
-		if (length - i >= HTXLen and name[i:i + HTXLen] == "HTX"):
+		elif (length - i >= HTXLen and name[i:i + HTXLen] == "HTX"):
+			return "HTX"
+		elif (length - i >= HEATERLen and name[i:i + HEATERLen] == "HEATER"):
 			return "HTX"
 		elif (length - i >= SEPLen and name[i:i + SEPLen] == "SEP"):
 			return "SEP"
@@ -35,32 +45,41 @@ def checkType(name):
 			return "HEX"
 		elif (length - i >= MIXLen and name[i:i + MIXLen] == "MIX"):
 			return "MIX"
-		elif (length - i >= PFRLen and name[i:i + PFRLen] == "PFR"):
-			return "REACT"
 		elif (length - i >= COMPLen and name[i:i + COMPLen] == "COMP"):
 			return "COMP"
 		elif (length - i >= COOLLen and name[i:i + COOLLen] == "COOL"):
 			return "COOL" 
-		elif (length - i >= SPFRLen and name[i:i + SPFRLen] == "SPFR"):
-			return "REACT"
-		elif (length - i >= DISTLen and name[i:i + DISTLen] == "DIST"):
-			return "DIST"
-		elif (length - i >= REACTLen and name[i:i + REACTLen] == "REACT"):
-			return "REACT"
 		elif (length - i >= FLASHLen and name[i:i + FLASHLen] == "FLASH"):
 			return "FLASH"
+		elif (length - i >= HEATXLen and name[i:i + HEATXLen] == "HEATX"):
+			return "HEX"
 		elif (length - i >= VALVELen and name[i:i + VALVELen] == "VALVE"):
 			return "MIX"
 		elif (length - i >= SPLITLen and name[i:i + SPLITLen] == "SPLIT"):
 			return "MIX"
-	# print(name)
+		elif (length - i >= PFRLen and name[i:i + PFRLen] == "PFR"):
+			return "REACT"
+		elif (length - i >= SPFRLen and name[i:i + SPFRLen] == "SPFR"):
+			return "REACT"
+		elif (length - i >= REACTLen and name[i:i + REACTLen] == "REACT"):
+			return "REACT"
+		elif (length - i >= RGIBBSLen and name[i:i + RGIBBSLen] == "RGIBBS"):
+			return "REACT"
+		elif (length - i >= RSTOICLen and name[i:i + RSTOICLen] == "RSTOIC"):
+			return "REACT"
+		elif (length - i >= DISTLen and name[i:i + DISTLen] == "DIST"):
+			return "DIST"
+		elif (length - i >= RADFRACLen and name[i:i + RADFRACLen] == "RADFRAC"):
+			return "DIST"
+		elif (length - i >= DUPLLen and name[i:i + DUPLLen] == "DUPL"):
+			return "DIST"
+	return "ETC"
 
 # cost = {} # 2차원 딕셔너리로 "이름" : {딕셔너리} 이렇게 저장하고 각 유닛 종류별 인자와 계산 결과를 출력한다.
 def calEquipmentCost(inputData, cost, utility): #react도 추가해야함.
-	for i in range(0, len(inputData), 1):
+	for key in inputData:
 		temp = {}
-		type = checkType(inputData[i][Index.NameIdx])
-
+		type = inputData[key]["Type"]
  		# 여기서 이제 cost의 값들을 하나씩 이름, 인자 순으로 저장해야함.
 		'''
 		1. EQUIPMENT COST
@@ -70,56 +89,56 @@ def calEquipmentCost(inputData, cost, utility): #react도 추가해야함.
 		- HEX, HTX : EQUIPMENT COST * (B1 + B2*FM)
 		'''
 		if (type == "HTX" or type == "COOL"):
-			if ("HOT UTILITY[kW]" in utility[inputData[i][Index.NameIdx]]):
+			if ("HOT UTILITY[kW]" in utility[key]):
 				utilityKey = "HOT UTILITY[kW]"
-			elif ("ELECTRICITY UTILITY[kW]" in utility[inputData[i][Index.NameIdx]]):
+			elif ("ELECTRICITY UTILITY[kW]" in utility[key]):
 				utilityKey = "ELECTRICITY UTILITY[kW]"
 			else:
 				utilityKey = "COOLING UTILITY[kg/hr]"
-			if(utility[inputData[i][Index.NameIdx]][utilityKey] < 0):
+			if(utility[key][utilityKey] < 0):
 				# error 이거 어떻게 처리해야하는거지?
 				# 이거 cooler라서 양수 전환해서 계산해야함
 				continue
 			temp["Diphenyl heater"] = deepcopy(HeaterParam["Diphenyl heater"])
-			temp["Diphenyl heater"]["EQUIPMENT COST"] = ((10**(temp["Diphenyl heater"]["K1"]+temp["Diphenyl heater"]["K2"]+temp["Diphenyl heater"]["K3"]))*(utility[inputData[i][Index.NameIdx]][utilityKey] / 10)**(0.6)) * (798.8 / 397)
+			temp["Diphenyl heater"]["EQUIPMENT COST"] = ((10**(temp["Diphenyl heater"]["K1"]+temp["Diphenyl heater"]["K2"]+temp["Diphenyl heater"]["K3"]))*(utility[key][utilityKey] / 10)**(0.6)) * (798.8 / 397)
 			
 			temp["Molten salt heater"] = deepcopy(HeaterParam["Molten salt heater"])
-			temp["Molten salt heater"]["EQUIPMENT COST"] = ((10**(temp["Molten salt heater"]["K1"]+temp["Molten salt heater"]["K2"]+temp["Molten salt heater"]["K3"]))*(utility[inputData[i][Index.NameIdx]][utilityKey] / 10)**(0.6)) * (798.8 / 397)
+			temp["Molten salt heater"]["EQUIPMENT COST"] = ((10**(temp["Molten salt heater"]["K1"]+temp["Molten salt heater"]["K2"]+temp["Molten salt heater"]["K3"]))*(utility[key][utilityKey] / 10)**(0.6)) * (798.8 / 397)
 			
 			temp["Hot water heater"] = deepcopy(HeaterParam["Hot water heater"])
-			temp["Hot water heater"]["EQUIPMENT COST"] = ((10**(temp["Hot water heater"]["K1"]+temp["Hot water heater"]["K2"]+temp["Hot water heater"]["K3"]))*(utility[inputData[i][Index.NameIdx]][utilityKey] / 10)**(0.6)) * (798.8 / 397)
+			temp["Hot water heater"]["EQUIPMENT COST"] = ((10**(temp["Hot water heater"]["K1"]+temp["Hot water heater"]["K2"]+temp["Hot water heater"]["K3"]))*(utility[key][utilityKey] / 10)**(0.6)) * (798.8 / 397)
 			
 			temp["Steam boiler"] = deepcopy(HeaterParam["Steam boiler"])
-			temp["Steam boiler"]["EQUIPMENT COST"] = ((10**(temp["Steam boiler"]["K1"]+temp["Steam boiler"]["K2"]+temp["Steam boiler"]["K3"]))*(utility[inputData[i][Index.NameIdx]][utilityKey] / 10)**(0.6)) * (798.8 / 397)
+			temp["Steam boiler"]["EQUIPMENT COST"] = ((10**(temp["Steam boiler"]["K1"]+temp["Steam boiler"]["K2"]+temp["Steam boiler"]["K3"]))*(utility[key][utilityKey] / 10)**(0.6)) * (798.8 / 397)
 		elif (type == "HEX"):
 			temp["Fixed tube"] = deepcopy(HeatExchangerParam["Fixed tube"])
-			temp["Fixed tube"]["EQUIPMENT COST"] = ((10**(temp["Fixed tube"]["K1"]+temp["Fixed tube"]["K2"]+temp["Fixed tube"]["K3"]))*(inputData[i][Index.HeatTransferAreaIdx] / 10)**(0.6)) * (798.8 / 397)
+			temp["Fixed tube"]["EQUIPMENT COST"] = ((10**(temp["Fixed tube"]["K1"]+temp["Fixed tube"]["K2"]+temp["Fixed tube"]["K3"]))*(inputData[key]["HeatTransferArea"] / 10)**(0.6)) * (798.8 / 397)
 			
 			temp["Floating head"] = deepcopy(HeatExchangerParam["Floating head"])
-			temp["Floating head"]["EQUIPMENT COST"] = ((10**(temp["Floating head"]["K1"]+temp["Floating head"]["K2"]+temp["Floating head"]["K3"]))*(inputData[i][Index.HeatTransferAreaIdx] / 10)**(0.6)) * (798.8 / 397)
+			temp["Floating head"]["EQUIPMENT COST"] = ((10**(temp["Floating head"]["K1"]+temp["Floating head"]["K2"]+temp["Floating head"]["K3"]))*(inputData[key]["HeatTransferArea"] / 10)**(0.6)) * (798.8 / 397)
 			
 			temp["U-tube"] = deepcopy(HeatExchangerParam["U-tube"])
-			temp["U-tube"]["EQUIPMENT COST"] = ((10**(temp["U-tube"]["K1"]+temp["U-tube"]["K2"]+temp["U-tube"]["K3"]))*(inputData[i][Index.HeatTransferAreaIdx] / 10)**(0.6)) * (798.8 / 397)
+			temp["U-tube"]["EQUIPMENT COST"] = ((10**(temp["U-tube"]["K1"]+temp["U-tube"]["K2"]+temp["U-tube"]["K3"]))*(inputData[key]["HeatTransferArea"] / 10)**(0.6)) * (798.8 / 397)
 			
 			temp["Bayonet"] = deepcopy(HeatExchangerParam["Bayonet"])
-			temp["Bayonet"]["EQUIPMENT COST"] = ((10**(temp["Bayonet"]["K1"]+temp["Bayonet"]["K2"]+temp["Bayonet"]["K3"]))*(inputData[i][Index.HeatTransferAreaIdx] / 10)**(0.6)) * (798.8 / 397)
+			temp["Bayonet"]["EQUIPMENT COST"] = ((10**(temp["Bayonet"]["K1"]+temp["Bayonet"]["K2"]+temp["Bayonet"]["K3"]))*(inputData[key]["HeatTransferArea"] / 10)**(0.6)) * (798.8 / 397)
 		elif (type == "COMP"):
 			temp["Centrifugal, axial and reciprocating"] = deepcopy(CompressorParam["Centrifugal, axial and reciprocating"])
-			if (inputData[i][Index.DriverPowerIdx] == 0):
+			if (inputData[key]["DriverPower"] == 0):
 				continue
 				#error
 				# 나중에 여기에 에러 처리 코드 넣기
-			temp["Centrifugal, axial and reciprocating"]["EQUIPMENT COST"] = (10**(temp["Centrifugal, axial and reciprocating"]["K1"] + temp["Centrifugal, axial and reciprocating"]["K2"] * (math.log(inputData[i][Index.DriverPowerIdx], 10)) + (temp["Centrifugal, axial and reciprocating"]["K3"] * ((math.log(inputData[i][Index.DriverPowerIdx], 10))**2)))) * (798.8 / 397)
+			temp["Centrifugal, axial and reciprocating"]["EQUIPMENT COST"] = (10**(temp["Centrifugal, axial and reciprocating"]["K1"] + temp["Centrifugal, axial and reciprocating"]["K2"] * (math.log(inputData[key]["DriverPower"], 10)) + (temp["Centrifugal, axial and reciprocating"]["K3"] * ((math.log(inputData[key]["DriverPower"], 10))**2)))) * (798.8 / 397)
 			temp["Rotary"] = deepcopy(CompressorParam["Rotary"])
-			temp["Rotary"]["EQUIPMENT COST"] = (10**(temp["Rotary"]["K1"] + temp["Rotary"]["K2"] * (math.log(inputData[i][Index.DriverPowerIdx], 10)) + (temp["Rotary"]["K3"] * ((math.log(inputData[i][Index.DriverPowerIdx], 10))**2)))) * (798.8 / 397)
+			temp["Rotary"]["EQUIPMENT COST"] = (10**(temp["Rotary"]["K1"] + temp["Rotary"]["K2"] * (math.log(inputData[key]["DriverPower"], 10)) + (temp["Rotary"]["K3"] * ((math.log(inputData[key]["DriverPower"], 10))**2)))) * (798.8 / 397)
 		elif (type == "REACT"):
 			temp["input"] = deepcopy(ReactParam["Nan"])
 			temp["input"]["EQUIPMENT COST"] = 0
 		# 여기는 이미 가격 계산 되어있으면 계산 안 하는 부분
-		if (inputData[i][Index.EquipmentCostIdx] != 0): 
+		if (inputData[key]["EquipmentCost"] != 0): 
 			temp["ATEA"] = {}
-			temp["ATEA"]["EQUIPMENT COST"] = inputData[i][Index.EquipmentCostIdx]
-		cost[inputData[i][Index.NameIdx]] = deepcopy(temp)
+			temp["ATEA"]["EQUIPMENT COST"] = inputData[key]["EquipmentCost"]
+		cost[key] = deepcopy(temp)
 	 
 # 이제 여기서 Capacity 값은 각 모듈별로 파싱해서 저장해둬야함.
 def safe_df(df):
@@ -141,15 +160,20 @@ def autofit(ws):
         ws.column_dimensions[col[0].column_letter].width = min(max_len + 2, 60)
 
 def printout(inputData, cost, utility, CAPEX, OPEX, profitAnalysis):
-    parse_out = pd.DataFrame(inputData)
-    parse_out.columns = ["Name","EquipmentCost","InstalledCost","EquipmentWeight",
-                         "InstalledWeight","UtilityCost","HeatTransferArea","DriverPower"]
+    
+    columns = ["Name","EquipmentCost","InstalledCost","EquipmentWeight",
+           "InstalledWeight","UtilityCost","HeatTransferArea","DriverPower"]
     wb = Workbook()
+    ws = wb.active
+    ws.title = "parse"
+    # 헤더 추가
+    # ws.append(columns)
+    # # 데이터 추가
+    ws.append(columns)
 
-    # 시트 1: parse
-    ws1 = wb.active
-    ws1.title = "parse"
-    for r in dataframe_to_rows(parse_out, index=False, header=True): ws1.append(r)
+# 2️⃣ 데이터 추가
+    for name, row in inputData.items():
+        ws.append([name] + [row[col] for col in columns[1:]])  # 첫 열은 name, 나머지는 columns 순서대로
 
     # 시트 2: UTILITY
     ws2 = wb.create_sheet("UTILITY")
@@ -185,9 +209,10 @@ def printout(inputData, cost, utility, CAPEX, OPEX, profitAnalysis):
     # 마지막에 한 번만 저장
     wb.save("output.xlsx")
 
-def inputRTX(inputData):
-	for key in inputData:
-		if (checkType(key) == "REACT"):
+def inputRTX(inputData, cost):
+	for key in cost:
+		# print(key + " " + inputData[key]["Type"])
+		if (inputData[key]["Type"] == "REACT"):
 			print("Enter the equipment cost for reactor [USD]", key, ": ", end='')
-			inputData[key]["input"]["EQUIPMENT COST"] = input()
+			cost[key]["input"]["EQUIPMENT COST"] = input()
 			

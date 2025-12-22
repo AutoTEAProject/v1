@@ -1,8 +1,23 @@
 #!/opt/anaconda3/envs/myenv/bin/python
 import pandas as pd
 import datetime
+import math
 from Utility import checkType
 from enums import Index
+from data import lawMaterialCostData, lawMaterialWeightData
+
+
+
+def parseLawMaterialExcelData():
+	filename = "./input/Material/MaterialData.xlsx"
+	df = pd.read_excel(io = filename, sheet_name='Data', header=1, engine='openpyxl')
+	length = len(df)
+	for i in range(length):
+		material = df.iat[i, 1]
+		weight = df.iat[i, 2]
+		cost = df.iat[i, 3]
+		lawMaterialCostData[material] = cost
+		lawMaterialWeightData[material] = weight
 
 '''
                                FLOWSHEET SECTION                                
@@ -45,16 +60,24 @@ def parseLawMaterial(filename, lawMaterialData):
 			line = line.strip()
 			parts = line.split()
 			if len(parts) == 5 and float(parts[3]) != 0.0:
-				if float(parts[3]) < 0 : 
-					print("%s 물질이 투입물이 맞습니까? (y/n) :" % parts[0], end='')
-					answer = input()
-					if answer == 'y':
+				if float(parts[3]) < 0 :
+					if (parts[0] in lawMaterialCostData):
 						lawMaterialData[parts[0]] = float(parts[3])
+					# print("%s 물질이 투입물이 맞습니까? (y/n) :" % parts[0], end='')
+					# answer = input()
+					# if answer == 'y':
+					# 	lawMaterialData[parts[0]] = float(parts[3])
+					'''
+						lawMaterialData[parts[0]] = float(parts[3])
+					if parts[0] in inputMaterialWeightData or parts[0] in outputMaterialWeightData:
+						'''
 				elif float(parts[3]) > 0 :
-					print("%s 물질이 생성물이 맞습니까? (y/n) :" % parts[0], end='')
-					answer = input()
-					if answer == 'y':
+					if (parts[0] in lawMaterialCostData):
 						lawMaterialData[parts[0]] = float(parts[3])
+					# print("%s 물질이 생성물이 맞습니까? (y/n) :" % parts[0], end='')
+					# answer = input()
+					# if answer == 'y':
+					# 	lawMaterialData[parts[0]] = float(parts[3])
 # error
 # 여기서 이제 각 원자재의 가격을 입력받을 것인지 아니면 코드에 박아넣을 것인지 결정해야함.
 
@@ -102,8 +125,10 @@ def parseHEX(filename, inputData):
 		area = df.iat[8, i]
 		for key in inputData:
 			if (inputData[key]["Name"] == name):
-				if (area != "nan"):
-					inputData[key]["HeatTransferArea"] = float(area) 
+				if (area != "nan" and not math.isnan(area)):
+					# print(area)
+					inputData[key]["HeatTransferArea"] = float(area)
+					# print(key + " " + str(area))
 	    			# HTX는 이 값으로 구하는 거 아니라서 변경해야함.Capacity (kW)를 활용함.. 또 쿨러는 뭔가 다른 것 같은데.. 우선 계산된 값은 건드리지 말자.
 				break
 
@@ -225,7 +250,7 @@ def	parseUtility(inputData, repfFileName, utility):
 			temp2 = temp[1].split(": ")
 			temp2 = temp2[0].split(" ")
 			name = temp2[0]
-			print(name)
+			# print(name)
 			for key in inputData:
 				if (inputData[key]["Name"] == name):
 					if (inputData[key]["Type"] == "COMP"):

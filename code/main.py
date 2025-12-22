@@ -1,5 +1,5 @@
 #!/opt/anaconda3/envs/myenv/bin/python
-from Parse import parseTEA, parseHEX, parseCOMP, parseCAPCOSTParam, parseUtility, parseLawMaterial, parseEQUIP
+from Parse import parseTEA, parseHEX, parseCOMP, parseCAPCOSTParam, parseUtility, parseLawMaterial, parseEQUIP, parseLawMaterialExcelData
 from Utility import calEquipmentCost, printout, inputRTX
 from Calc import calCAPEX, calUtility, calOPEX, calProfitAnalysis
 
@@ -13,7 +13,8 @@ OPEX = {}
 utility =  {}
 profitAnalysis = {}
 
-try: 
+try:
+	parseLawMaterialExcelData()
 	parseTEA(inputfile, inputData)
 	parseEQUIP(inputrep, inputData)
 	parseHEX(inputfile, inputData)
@@ -22,7 +23,6 @@ try:
 
 except Exception as e:
 	print("Error parsexlxs:", e)
-
 try: 
 	parseLawMaterial(inputrep, lawMaterialData) #KMOL/HR 단위로 추출  {'H2': -1841.32, 'N2': -613.773, 'NH3': 1227.55}
 	parseUtility(inputData, inputrep, utility)

@@ -43,11 +43,11 @@ def calCAPEX(inputData, cost, CAPEX):
  
 	CAPEX["Total capital investment (Capex)"] = 0
 	CAPEX["Annualized capital cost (r=5%, t=30 year)"] = 0
-	# print(cost)
+
 	for key in cost:
-		# print(key + " " + inputData[key]["Type"])
 		if ("ATEA" in cost[key]):
 			CAPEX["Equipment cost"] += int(cost[key]["ATEA"]["EQUIPMENT COST"])
+			# print("error")
 			continue;
 		if (inputData[key]["Type"] == "REACT"):
 			CAPEX["Equipment cost"] += int(cost[key]["input"]["EQUIPMENT COST"])
@@ -153,10 +153,8 @@ def calOPEX(CAPEX, lawMaterialData, OPEX, utility):
 	OPEX["Raw materials"] = 0 # 이거 raw material key에 따른 알맞은 값 넣어야함.
 	for key in lawMaterialData:
 		if lawMaterialData[key] < 0:
-			OPEX["Raw materials"] += lawMaterialData[key] * lawMaterialCostData[key] * calcOPEXdata["plantOperationHours"] * -1 * lawMaterialWeightData[key] * lawMaterialWeightData[key]  # kg 단위로 바꿔주기 위해 1000으로 나눔
-		# elif key == "CATALYST":
-			# 	OPEX["Raw materials"] += lawMaterialData[key] * plantOperationHours * -1 * calcOPEXdata["catalystPrice"] / 1000  # ton 단위로 바꿔주기 위해 1000으로 나눔
-	#OPEX["Raw materials"] = lawMaterialData["H2"] * plantOperationHours *  -1 * hydrogenPrice * hydrogenWeight + lawMaterialData["N2"] * plantOperationHours * -1 * nitrogenPrice * nitrogenWeight
+			OPEX["Raw materials"] += lawMaterialData[key] * lawMaterialCostData[key] * calcOPEXdata["plantOperationHours"] * -1 * lawMaterialWeightData[key]  # kg 단위로 바꿔주기 위해 1000으로 나눔
+			# OPEX["Raw materials"] += lawMaterialData[key] * inputMaterialCostData[key] * calcOPEXdata["plantOperationHours"] * -1 * inputMaterialWeightData[key]   # kg 단위로 바꿔주기 위해 1000으로 나눔
 	OPEX["Utility"] = 0
 	for key in utility:
 		if "ELECTRICITY UTILITY ANNUAL COST [USD/year]" in utility[key] and utility[key]["ELECTRICITY UTILITY ANNUAL COST [USD/year]"] > 0:
@@ -197,6 +195,7 @@ def calProfitAnalysis(CAPEX, OPEX, profitAnalysis, lawMaterialData):
 	for key in lawMaterialData:
 		if lawMaterialData[key] > 0:
 			profitAnalysis["annual amount of product [ton/yr]"] = lawMaterialData[key] * calcOPEXdata["plantOperationHours"] * lawMaterialWeightData[key] / 1000  # ton/yr
+			# profitAnalysis["annual amount of product [ton/yr]"] = lawMaterialData[key] * calcOPEXdata["plantOperationHours"] * outputMaterialWeightData[key] / 1000  # ton/yr
 			break
 	if (profitAnalysis["annual amount of product [ton/yr]"] == 0):
 		profitAnalysis["Manufacturing cost [USD/ton]"] = 0

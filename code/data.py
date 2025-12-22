@@ -1,57 +1,9 @@
-lawMaterialCostData = {
-	'H2': 5, #USD/kg
-	'N2': 2, #USD/kg
-	'O2': 0.08, #USD/kg
-	'CH4': 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C2H6' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C3H8' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C4H10' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C5H12' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C6H14' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C7H16' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C8H18' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C9H20' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C10H22' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C11H24' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C12H26' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C13H28' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C14H30' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C15H32' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C16H34' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C17H36' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'C18H38' : 0.325, #USD/kg -> 천연가스 가격으로 일단 설정
-	'MEOH': 5, #USD/kg -> 이거 가격 확인 필요
-	'H2O': 0.00053, #USD/kg
-	'CO2': 0.0558 #USD/kg
-}
+# This file includes all the data required for TEA calculation.
+import pandas as pd
 
-lawMaterialWeightData = {
-	'H2': 2.016, #g/mol
-	'N2': 28.014, #g/mol
-	'O2': 32.00, #g/mol
-	'CH4': 16.04, #g/mol
-	'C2H6' : 30.07, #g/mol
-	'C3H8' : 44.10, #g/mol
-	'C4H10' : 58.12, #g/mol
-	'C5H12' : 72.15, #g/mol
-	'C6H14' : 86.18, #g/mol
-	'C7H16' : 100.20, #g/mol
-	'C8H18' : 114.23, #g/mol
-	'C9H20' : 128.26, #g/mol
-	'C10H22' : 142.29, #g/mol
-	'C11H24' : 156.31, #g/mol
-	'C12H26' : 170.34, #g/mol
-	'C13H28' : 184.37, #g/mol
-	'C14H30' : 198.39, #g/mol
-	'C15H32' : 212.42, #g/mol
-	'C16H34' : 226.45, #g/mol
-	'C17H36' : 240.48, #g/mol
-	'C18H38' : 254.50, #g/mol
-	'MEOH': 32.04, #g/mol
-	'H2O': 18.015, #g/mol
-	'NH3': 17.031, #g/mol
-	'CO2': 44.01 #g/mol
-}
+lawMaterialCostData = {}
+
+lawMaterialWeightData = {}
 
 utilityCostData = {
     'electricityCostPerKWH' : 0.1088, # $USD/kWh -> ELECTRICITY UTILITY 계산할 때 사용
@@ -69,6 +21,10 @@ profitAnalysisData = {
 	'depreciationLifetime' : 20, #years
 }
 
+
+
+
+# 여기부터는 각종 설비 비용 산정을 위한 상수들입니다.
 HeaterParam = {
 	"Diphenyl heater" : {"K1": 2.2628, "K2": 0.8581, "K3": 0.0003} ,
 	"Molten salt heater" : {"K1": 1.1979, "K2": 1.4782, "K3": -0.0958} ,
@@ -90,3 +46,4 @@ CompressorParam = {
 ReactParam = {
 	"Nan" : {"K1": 0, "K2": 0, "K3": 0}
 }
+

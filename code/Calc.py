@@ -1,5 +1,5 @@
 from Utility import checkType
-from data import lawMaterialCostData, lawMaterialWeightData, utilityCostData, calcOPEXdata, profitAnalysisData
+from data import lawMaterialCostData, lawMaterialWeightData, utilityCostData, calcOPEXdata, profitAnalysisData, outputFlowData
 from enums import Index
 
 def calCAPEX(inputData, cost, CAPEX):
@@ -190,12 +190,10 @@ def calProfitAnalysis(CAPEX, OPEX, profitAnalysis, lawMaterialData):
 	profitAnalysis[" "] = product
 	profitAnalysis["OPEX"] = OPEX["OPEX"]
 	profitAnalysis["Depreciation [USD/yr]"] = CAPEX["Fixed capital investment (FCI)"][1] / profitAnalysisData["depreciationLifetime"]
-	profitAnalysis["annual amount of product [ton/yr]"] = 0
-	for key in lawMaterialData:
-		if lawMaterialData[key] > 0:
-			profitAnalysis["annual amount of product [ton/yr]"] = lawMaterialData[key] * calcOPEXdata["plantOperationHours"] * lawMaterialWeightData[key] / 1000  # ton/yr
-			break
-	if (profitAnalysis["annual amount of product [ton/yr]"] == 0):
-		profitAnalysis["Manufacturing cost [USD/ton]"] = 0
-	else:
-		profitAnalysis["Manufacturing cost [USD/ton]"] = (profitAnalysis["OPEX"] + profitAnalysis["Depreciation [USD/yr]"]) / profitAnalysis["annual amount of product [ton/yr]"]
+	for output_stream in outputFlowData:
+		material = outputFlowData[output_stream]
+		profitAnalysis[output_stream + " annual amount of product [ton/yr]"] = 0
+		for key in material:
+			profitAnalysis[output_stream + " annual amount of product [ton/yr]"] += lawMaterialData[key] * calcOPEXdata["plantOperationHours"] * lawMaterialWeightData[key] / 1000  # ton/yr
+		profitAnalysis[output_stream + " manufacturing cost [USD/ton]"] = 0
+		profitAnalysis[output_stream + " manufacturing cost [USD/ton]"] = (profitAnalysis["OPEX"] + profitAnalysis["Depreciation [USD/yr]"]) / profitAnalysis[output_stream + "annual amount of product [ton/yr]"]

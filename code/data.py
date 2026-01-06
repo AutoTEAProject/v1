@@ -5,6 +5,8 @@ lawMaterialCostData = {}
 
 lawMaterialWeightData = {}
 
+outputFlowData = {}
+
 utilityCostData = {
     'electricityCostPerKWH' : 0.1088, # $USD/kWh -> ELECTRICITY UTILITY 계산할 때 사용
 	'NGprice' : 0.0075, # USD/kWh -> Hot utility 계산할 때 사용

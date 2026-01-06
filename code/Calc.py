@@ -4,86 +4,85 @@ from enums import Index
 
 def calCAPEX(inputData, cost, CAPEX):
 	#CAPEX 출력 순서 지정을 위한 전방선언
-	CAPEX["CAPEX"] = ""
-	CAPEX[" "] = ""
-	CAPEX["CLASSIFICATION"] = "[USD/yr]"
-	CAPEX[" "] = ""
-	CAPEX["Direct cost"] = ""
-	CAPEX["ISBL (Inside battery limit, 전체공사구역 중 주 공정시설)"] = ""
-	CAPEX["Equipment cost"] = 0
-	CAPEX["Installation of equipment "] = 0
-	CAPEX["Instrument and control"] = 0
-	CAPEX["Piping"] = 0
-	CAPEX["Electrical"] = 0
-	CAPEX["  "] = ""
+	CAPEX["CAPEX"] = ["  ", "  "]
+	CAPEX[" "] = ["  ", "  "]
+	CAPEX["CLASSIFICATION"] = ["% of FCI", "[USD/yr]"]
+	CAPEX[" "] = ["  ", "  "]
+	CAPEX["Direct cost"] = ["  ", "  "]
+	CAPEX["ISBL (Inside battery limit, 전체공사구역 중 주 공정시설)"] = ["  ", "  "]
+	CAPEX["Equipment cost"] = ["20-40", 0]
+	CAPEX["Installation of equipment "] = ["7.3-26"]
+	CAPEX["Instrument and control"] = ["2.5-7.0"]
+	CAPEX["Piping"] = ["3.0-15"]
+	CAPEX["Electrical"] = ["2.5-9.0"]
+	CAPEX["  "] = ["  ", "  "]
  
-	CAPEX["OSBL(Outside bettery limit,주공정시설 외 부대시설)"] = ""
-	CAPEX["Building and building services"] = 0
-	CAPEX["Yard improvements"] = 0
-	CAPEX["Services facilities"] = 0
-	CAPEX["Land"] = 0
-	CAPEX[" "] = ""
+	CAPEX["OSBL(Outside bettery limit,주공정시설 외 부대시설)"] = ["  ", "  "]
+	CAPEX["Building and building services"] = ["6.0-20"]
+	CAPEX["Yard improvements"] = ["1.5-5.0"]
+	CAPEX["Services facilities"] = ["8.0-35"]
+	CAPEX["Land"] = ["1.0-2.0"]
+	CAPEX[" "] = ["  ", "  "]
 
-	CAPEX["Total direct cost"] = 0
-	CAPEX["   "] = ""
+	CAPEX["Total direct cost"] = ["  "]
+	CAPEX["   "] = ["  ", "  "]
 
-	CAPEX["Indirect cost"] = ""
-	CAPEX["Engineering"] = 0
-	CAPEX["Construction expenses"] = 0
-	CAPEX["Contractor's fee"] = 0
-	CAPEX["Contingency"] = 0
-	CAPEX["    "] = ""
+	CAPEX["Indirect cost"] = ["  ", "  "]
+	CAPEX["Engineering"] = ["4.0-21"]
+	CAPEX["Construction expenses"] = ["4.8-22"]
+	CAPEX["Contractor's fee"] = ["1.5-5.0"]
+	CAPEX["Contingency"] = ["5.0-20"]
+	CAPEX["    "] = ["  ", "  "]
  
-	CAPEX["Total indirect cost"] = 0
-	CAPEX["     "] = ""
+	CAPEX["Total indirect cost"] = ["  "]
+	CAPEX["     "] = ["  ", "  "]
  
-	CAPEX["Fixed capital investment (FCI)"] = 0
-	CAPEX["Start up cost (SUC)"] = 0
-	CAPEX["      "] = ""
+	CAPEX["Fixed capital investment (FCI)"] = ["100"]
+	CAPEX["Start up cost (SUC)"] = ["10"]
+	CAPEX["      "] = ["  ", "  "]
  
-	CAPEX["Total capital investment (Capex)"] = 0
-	CAPEX["Annualized capital cost (r=5%, t=30 year)"] = 0
+	CAPEX["Total capital investment (Capex)"] = ["TCI"]
+	CAPEX["Annualized capital cost (r=5%, t=30 year)"] = ["EAC", 0]
 
 	for key in cost:
 		if ("ATEA" in cost[key]):
-			CAPEX["Equipment cost"] += int(cost[key]["ATEA"]["EQUIPMENT COST"])
+			CAPEX["Equipment cost"][1] += int(cost[key]["ATEA"]["EQUIPMENT COST"])
 			# print("error")
 			continue;
 		if (inputData[key]["Type"] == "REACT"):
-			CAPEX["Equipment cost"] += int(cost[key]["input"]["EQUIPMENT COST"])
+			CAPEX["Equipment cost"][1] += int(cost[key]["input"]["EQUIPMENT COST"])
 		elif(inputData[key]["Type"] == "HEX"):
-			CAPEX["Equipment cost"] += int(cost[key]["U-tube"]["EQUIPMENT COST"])
+			CAPEX["Equipment cost"][1] += int(cost[key]["U-tube"]["EQUIPMENT COST"])
 		elif(inputData[key]["Type"] == "HTX"):
-			CAPEX["Equipment cost"] += int(cost[key]["Hot water heater"]["EQUIPMENT COST"])
+			CAPEX["Equipment cost"][1] += int(cost[key]["Hot water heater"]["EQUIPMENT COST"])
 		elif(inputData[key]["Type"] == "COMP"):
-			CAPEX["Equipment cost"] += int(cost[key]["Centrifugal, axial and reciprocating"]["EQUIPMENT COST"])
+			CAPEX["Equipment cost"][1] += int(cost[key]["Centrifugal, axial and reciprocating"]["EQUIPMENT COST"])
 		elif(inputData[key]["Type"] == "FLASH"):
-			CAPEX["Equipment cost"] += int(cost[key]["ATEA"]["EQUIPMENT COST"])
-	CAPEX["Fixed capital investment (FCI)"] = CAPEX["Equipment cost"] * 100 / 40
-	CAPEX["Start up cost (SUC)"] = CAPEX["Fixed capital investment (FCI)"] * 0.1
+			CAPEX["Equipment cost"][1] += int(cost[key]["ATEA"]["EQUIPMENT COST"])
+	CAPEX["Fixed capital investment (FCI)"].append(CAPEX["Equipment cost"][1] * 100 / 40)
+	CAPEX["Start up cost (SUC)"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.1)
 
-	CAPEX["Installation of equipment "] = CAPEX["Fixed capital investment (FCI)"] * 0.08
-	CAPEX["Instrument and control"] = CAPEX["Fixed capital investment (FCI)"] * 0.05
-	CAPEX["Piping"] = CAPEX["Fixed capital investment (FCI)"] * 0.03
-	CAPEX["Electrical"] = CAPEX["Fixed capital investment (FCI)"] * 0.05
+	CAPEX["Installation of equipment "].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.08)
+	CAPEX["Instrument and control"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.05)
+	CAPEX["Piping"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.03)
+	CAPEX["Electrical"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.05)
 	
-	CAPEX["Building and building services"] = CAPEX["Fixed capital investment (FCI)"] * 0.07
-	CAPEX["Yard improvements"] = CAPEX["Fixed capital investment (FCI)"] * 0.02
-	CAPEX["Services facilities"] = CAPEX["Fixed capital investment (FCI)"] * 0.08
-	CAPEX["Land"] = CAPEX["Fixed capital investment (FCI)"] * 0.02
+	CAPEX["Building and building services"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.07)
+	CAPEX["Yard improvements"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.02)
+	CAPEX["Services facilities"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.08)
+	CAPEX["Land"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.02)
  
-	CAPEX["Total direct cost"] = CAPEX["Equipment cost"] + CAPEX["Installation of equipment "] + CAPEX["Instrument and control"] + CAPEX["Piping"] + CAPEX["Electrical"] + CAPEX["Building and building services"] + CAPEX["Yard improvements"] + CAPEX["Services facilities"] + CAPEX["Land"]
+	CAPEX["Total direct cost"].append(CAPEX["Equipment cost"][1] + CAPEX["Installation of equipment "][1] + CAPEX["Instrument and control"][1] + CAPEX["Piping"][1] + CAPEX["Electrical"][1] + CAPEX["Building and building services"][1] + CAPEX["Yard improvements"][1] + CAPEX["Services facilities"][1] + CAPEX["Land"][1])
  
-	CAPEX["Engineering"] = CAPEX["Fixed capital investment (FCI)"] * 0.05
-	CAPEX["Construction expenses"] = CAPEX["Fixed capital investment (FCI)"] * 0.05
-	CAPEX["Contractor's fee"] = CAPEX["Fixed capital investment (FCI)"] * 0.05
-	CAPEX["Contingency"] = CAPEX["Fixed capital investment (FCI)"] * 0.05
+	CAPEX["Engineering"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.05)
+	CAPEX["Construction expenses"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.05)
+	CAPEX["Contractor's fee"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.05)
+	CAPEX["Contingency"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.05)
 
-	CAPEX["Total indirect cost"] = CAPEX["Engineering"] + CAPEX["Construction expenses"] + CAPEX["Contractor's fee"] + CAPEX["Contingency"]
-	CAPEX["Start up cost (SUC)"] = CAPEX["Fixed capital investment (FCI)"] * 0.1
+	CAPEX["Total indirect cost"].append(CAPEX["Engineering"][1] + CAPEX["Construction expenses"][1] + CAPEX["Contractor's fee"][1] + CAPEX["Contingency"][1])
 	
-	CAPEX["Total capital investment (Capex)"] = CAPEX["Start up cost (SUC)"] + CAPEX["Fixed capital investment (FCI)"]
-	CAPEX["Annualized capital cost (r=5%, t=30 year)"] = CAPEX["Total capital investment (Capex)"] / ((1 - (1 / ((1.05)**30)))/0.05)
+	CAPEX["Total capital investment (Capex)"].append(CAPEX["Start up cost (SUC)"][1] + CAPEX["Fixed capital investment (FCI)"][1])
+	CAPEX["Annualized capital cost (r=5%, t=30 year)"][1] = (CAPEX["Total capital investment (Capex)"][1] / ((1 - (1 / ((1.05)**30)))/0.05))
 
 def calUtility(utility):
 	for key in utility:
@@ -119,7 +118,7 @@ def calOPEX(CAPEX, lawMaterialData, OPEX, utility):
 
 	#OPEX 출력 순서 지정을 위한 전방선언
 	OPEX["OPEX (Total product costm TPC)"] = ""
-	OPEX[" "] = ""
+	OPEX[" "] = []
 	OPEX["CLASSIFICATION"] = "[USD/yr]"
 	OPEX[" "] = ""
 	OPEX["Fixed charge(FC)"] = 0
@@ -147,8 +146,8 @@ def calOPEX(CAPEX, lawMaterialData, OPEX, utility):
 	OPEX["    "] = ""
 	OPEX["OPEX"] = 0
 
-	OPEX["Fixed charge(FC)"] = CAPEX["Fixed capital investment (FCI)"] * 0.01
-	OPEX["Local taxes, Insurance"] = CAPEX["Fixed capital investment (FCI)"] * 0.01
+	OPEX["Fixed charge(FC)"] = CAPEX["Fixed capital investment (FCI)"][1] * 0.01
+	OPEX["Local taxes, Insurance"] = CAPEX["Fixed capital investment (FCI)"][1] * 0.01
 
 	OPEX["Raw materials"] = 0 # 이거 raw material key에 따른 알맞은 값 넣어야함.
 	for key in lawMaterialData:
@@ -164,12 +163,12 @@ def calOPEX(CAPEX, lawMaterialData, OPEX, utility):
 		if "HOT UTILITY ANNUAL COST [USD/year]" in utility[key] and utility[key]["HOT UTILITY ANNUAL COST [USD/year]"] > 0:
 			OPEX["Utility"] += utility[key]["HOT UTILITY ANNUAL COST [USD/year]"]
 
-	OPEX["Matinenenance (M)"] = CAPEX["Fixed capital investment (FCI)"] * 0.01
+	OPEX["Matinenenance (M)"] = CAPEX["Fixed capital investment (FCI)"][1] * 0.01
 	OPEX["Operating supplies"] = OPEX["Matinenenance (M)"] * 0.1
 
 
 
-	OPEX["OPEX"] = 1.35135135135 * (CAPEX["Fixed capital investment (FCI)"] * 0.026 + (OPEX["Utility"] + OPEX["Raw materials"]))
+	OPEX["OPEX"] = 1.35135135135 * (CAPEX["Fixed capital investment (FCI)"][1] * 0.026 + (OPEX["Utility"] + OPEX["Raw materials"]))
 	OPEX["Operating labor (OL)"] = OPEX["OPEX"] * 0.1
 	OPEX["Supervision and support labor (S)"] = OPEX["Operating labor (OL)"] * 0.3
 	OPEX["Laboratory charges"] = OPEX["Operating labor (OL)"] * 0.1
@@ -190,12 +189,11 @@ def calProfitAnalysis(CAPEX, OPEX, profitAnalysis, lawMaterialData):
 
 	profitAnalysis[" "] = product
 	profitAnalysis["OPEX"] = OPEX["OPEX"]
-	profitAnalysis["Depreciation [USD/yr]"] = CAPEX["Fixed capital investment (FCI)"] / profitAnalysisData["depreciationLifetime"]
+	profitAnalysis["Depreciation [USD/yr]"] = CAPEX["Fixed capital investment (FCI)"][1] / profitAnalysisData["depreciationLifetime"]
 	profitAnalysis["annual amount of product [ton/yr]"] = 0
 	for key in lawMaterialData:
 		if lawMaterialData[key] > 0:
 			profitAnalysis["annual amount of product [ton/yr]"] = lawMaterialData[key] * calcOPEXdata["plantOperationHours"] * lawMaterialWeightData[key] / 1000  # ton/yr
-			# profitAnalysis["annual amount of product [ton/yr]"] = lawMaterialData[key] * calcOPEXdata["plantOperationHours"] * outputMaterialWeightData[key] / 1000  # ton/yr
 			break
 	if (profitAnalysis["annual amount of product [ton/yr]"] == 0):
 		profitAnalysis["Manufacturing cost [USD/ton]"] = 0

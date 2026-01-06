@@ -4,13 +4,11 @@ import datetime
 import math
 from Utility import checkType
 from enums import Index
-from data import lawMaterialCostData, lawMaterialWeightData
+from data import lawMaterialCostData, lawMaterialWeightData, outputFlowData
 
-
-
-def parseLawMaterialExcelData():
+def parseInputMaterial():
 	filename = "./input/Material/MaterialData.xlsx"
-	df = pd.read_excel(io = filename, sheet_name='Data', header=1, engine='openpyxl')
+	df = pd.read_excel(io = filename, sheet_name='input', header=1, engine='openpyxl')
 	length = len(df)
 	for i in range(length):
 		material = df.iat[i, 1]
@@ -18,6 +16,32 @@ def parseLawMaterialExcelData():
 		cost = df.iat[i, 3]
 		lawMaterialCostData[material] = cost
 		lawMaterialWeightData[material] = weight
+
+def parseOutputMaterial():
+	filename = "./input/Material/MaterialData.xlsx"
+	df = pd.read_excel(io = filename, sheet_name='output', header=1, engine='openpyxl')
+	length = len(df)
+	for i in range(length):
+		material = df.iat[i, 1]
+		weight = df.iat[i, 2]
+		cost = df.iat[i, 3]
+		flow = df.iat[i, 4]
+		flag = 0
+		lawMaterialCostData[material] = cost
+		lawMaterialWeightData[material] = weight
+		for key in outputFlowData:
+			if key == flow:
+				flag = 1
+				outputFlowData[key].append(material)
+		if flag == 0:
+			outputFlowData[flow] = [];
+			outputFlowData[flow].append(material)
+  # flowName 받아서 이거 따로 저장해야함.
+
+
+def parseLawMaterialExcelData():
+	parseInputMaterial()
+	parseOutputMaterial()
 
 '''
                                FLOWSHEET SECTION                                

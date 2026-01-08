@@ -2,7 +2,7 @@
 import pandas as pd
 import datetime
 import math
-from Utility import checkType
+from Utility import checkType, calMaterialWeight
 from enums import Index
 from data import lawMaterialCostData, lawMaterialWeightData, outputFlowData
 
@@ -12,8 +12,10 @@ def parseInputMaterial():
 	length = len(df)
 	for i in range(length):
 		material = df.iat[i, 1]
-		weight = df.iat[i, 2]
-		cost = df.iat[i, 3]
+		cost = df.iat[i, 2]
+		if (material == ""):
+			break;
+		weight = calMaterialWeight(material)
 		lawMaterialCostData[material] = cost
 		lawMaterialWeightData[material] = weight
 
@@ -23,9 +25,11 @@ def parseOutputMaterial():
 	length = len(df)
 	for i in range(length):
 		material = df.iat[i, 1]
-		weight = df.iat[i, 2]
-		cost = df.iat[i, 3]
-		flow = df.iat[i, 4]
+		cost = df.iat[i, 2]
+		flow = df.iat[i, 3]
+		if (material == ""):
+			break;
+		weight = calMaterialWeight(material)
 		flag = 0
 		lawMaterialCostData[material] = cost
 		lawMaterialWeightData[material] = weight

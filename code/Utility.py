@@ -6,6 +6,7 @@ from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.styles import Font
 from data import HeaterParam, HeatExchangerParam, CompressorParam, ReactParam
+from openpyxl import load_workbook
 
 # RGIBBS, FLASH2, RADFRAC, RSTOIC, FSPLIT, FLASH3, DUPL, VALVE, HEATER, COMPR, HEATX, MIXER
 
@@ -199,9 +200,8 @@ def printout(inputData, cost, utility, CAPEX, OPEX, profitAnalysis):
     
     # 시트 5: OPEX
     ws5 = wb.create_sheet("OPEX")
-    opex_df = pd.DataFrame([OPEX]).T  if isinstance(OPEX, dict) else pd.DataFrame(OPEX).T 
-    for r in dataframe_to_rows(opex_df, header=False):
-        ws5.append(r)
+    for key, values in OPEX.items():
+        ws5.append([key] + values)
     autofit(ws5)
     
     ws6 = wb.create_sheet("Profitability Analysis")
@@ -213,10 +213,45 @@ def printout(inputData, cost, utility, CAPEX, OPEX, profitAnalysis):
     # 마지막에 한 번만 저장
     wb.save("output.xlsx")
 
-def inputRTX(inputData, cost):
+def parseReact(excelReactorData):
+	filename = "./input/Material/MaterialData.xlsx"
+	df = pd.read_excel(io = filename, sheet_name='Reactor', header=1, engine='openpyxl')
+	length = len(df)
+	for i in range(length):
+		name = df.iat[i, 1]
+		cost = df.iat[i, 2]
+		excelReactorData[name] = cost
+
+def inputReactorName(inputData, cost):
+	filename = "./input/Material/MaterialData.xlsx"
+
+	# 기존 엑셀 로드
+	wb = load_workbook(filename)
+	ws = wb["Reactor"]
+
+	# pandas로 DF 로드 (기존 데이터 확인용)
+	df = pd.read_excel(filename, sheet_name='Reactor', header=1, engine='openpyxl')
+
+	# name 컬럼이 실제 몇 번째인지 찾기
+	name_col_index = list(df.columns).index("Reactor Name") + 1  # excel column index (+1 필요)
+
+	current_row = 3  # 데이터 시작 row
+
 	for key in cost:
-		# print(key + " " + inputData[key]["Type"])
-		if (inputData[key]["Type"] == "REACT"):
-			print("Enter the equipment cost for reactor [USD]", key, ": ", end='')
-			cost[key]["input"]["EQUIPMENT COST"] = input()
+		if inputData[key]["Type"] == "REACT":
+			ws.cell(row=current_row, column=name_col_index).value = key
+			current_row += 1
+
+	wb.save(filename)
 			
+
+def inputRTX(inputData, cost):
+	excelReactorData = {};
+	parseReact(excelReactorData)
+	for key in cost:
+		if (inputData[key]["Type"] == "REACT"):
+			if key in excelReactorData:
+				cost[key]["input"]["EQUIPMENT COST"] = excelReactorData[key]
+			else:
+				inputReactorName(inputData, cost)
+				raise Exception("reactor의 가격을 엑셀 시트에 이름에 맞게 입력해주세요")

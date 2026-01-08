@@ -32,7 +32,7 @@ except Exception as e:
 	print("Error parserep:", e)
 
 try:
-	inputRTX(inputData, cost)
+	inputRTX(inputData, cost) # 여기서 reactor 엑셀에 입력하고 읽어오기
 	calCAPEX(inputData, cost, CAPEX)
 	calUtility(utility)
 	calOPEX(CAPEX, lawMaterialData, OPEX, utility)

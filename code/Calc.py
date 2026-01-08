@@ -117,68 +117,67 @@ def calUtility(utility):
 def calOPEX(CAPEX, lawMaterialData, OPEX, utility):
 
 	#OPEX 출력 순서 지정을 위한 전방선언
-	OPEX["OPEX (Total product costm TPC)"] = ""
-	OPEX[" "] = []
-	OPEX["CLASSIFICATION"] = "[USD/yr]"
-	OPEX[" "] = ""
-	OPEX["Fixed charge(FC)"] = 0
-	OPEX["Local taxes, Insurance"] = 0
-	OPEX[" "] = ""
+	OPEX["OPEX (Total product costm TPC)"] = [" " ," "]
+	OPEX[" "] = [" " ," "]
+	OPEX["CLASSIFICATION"] = ["(REF Range)", "[USD/yr]"]
+	OPEX[" "] = [" " ," "]
+	OPEX["Fixed charge(FC)"] = [" "]
+	OPEX["Local taxes, Insurance"] = ["1~4% of FCI"]
+	OPEX[" "] = [" " ," "]
  
-	OPEX["Direct production cost (DPC)"] = 0
-	OPEX["Raw materials"] = 0
-	OPEX["Utility"] = 0
-	OPEX["Matinenenance (M)"] = 0
-	OPEX["Operating labor (OL)"] = 0
-	OPEX["Supervision and support labor (S)"] = 0
-	OPEX["Operating supplies"] = 0
-	OPEX["Laboratory charges"] = 0
-	OPEX["  "] = ""
+	OPEX["Direct production cost (DPC)"] = [" "]
+	OPEX["Raw materials"] = [" "]
+	OPEX["Utility"] = [" "]
+	OPEX["Matinenenance (M)"] = ["1~10% of FCI"]
+	OPEX["Operating labor (OL)"] = ["10~20% of OPEX"]
+	OPEX["Supervision and support labor (S)"] = ["30 or 15(peter)% of OL"]
+	OPEX["Operating supplies"] = ["10~20% of M"]
+	OPEX["Laboratory charges"] = ["10~20% of OL"]
+	OPEX["  "] = [" " ," "]
  
-	OPEX["Plant overhead cost(OVHD)"] = 0
-	OPEX["   "] = ""
+	OPEX["Plant overhead cost(OVHD)"] = ["50~70% of M+OL+S"]
+	OPEX["   "] = [" " ," "]
  
-	OPEX["General expenses"] = 0
-	OPEX["Admistrative cost"] = 0
-	OPEX["Distribution and marketing"] = 0
-	OPEX["R&D cost"] = 0
+	OPEX["General expenses"] = [" "]
+	OPEX["Admistrative cost"] = ["15~20% of OL"]
+	OPEX["Distribution and marketing"] = ["2~20% of OPEX"]
+	OPEX["R&D cost"] = ["2~5% of OPEX"]
  
-	OPEX["    "] = ""
-	OPEX["OPEX"] = 0
+	OPEX["    "] = [" " ," "]
+	OPEX["OPEX"] = [" "]
 
-	OPEX["Fixed charge(FC)"] = CAPEX["Fixed capital investment (FCI)"][1] * 0.01
-	OPEX["Local taxes, Insurance"] = CAPEX["Fixed capital investment (FCI)"][1] * 0.01
+	OPEX["Fixed charge(FC)"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.01)
+	OPEX["Local taxes, Insurance"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.01)
 
-	OPEX["Raw materials"] = 0 # 이거 raw material key에 따른 알맞은 값 넣어야함.
+	OPEX["Raw materials"] = [" ", 0] # 이거 raw material key에 따른 알맞은 값 넣어야함.
 	for key in lawMaterialData:
 		if lawMaterialData[key] < 0:
-			OPEX["Raw materials"] += lawMaterialData[key] * lawMaterialCostData[key] * calcOPEXdata["plantOperationHours"] * -1 * lawMaterialWeightData[key]  # kg 단위로 바꿔주기 위해 1000으로 나눔
-			# OPEX["Raw materials"] += lawMaterialData[key] * inputMaterialCostData[key] * calcOPEXdata["plantOperationHours"] * -1 * inputMaterialWeightData[key]   # kg 단위로 바꿔주기 위해 1000으로 나눔
-	OPEX["Utility"] = 0
+			OPEX["Raw materials"][1] += lawMaterialData[key] * lawMaterialCostData[key] * calcOPEXdata["plantOperationHours"] * -1 * lawMaterialWeightData[key]  # kg 단위로 바꿔주기 위해 1000으로 나눔
+	OPEX["Utility"] = [" ", 0]
 	for key in utility:
 		if "ELECTRICITY UTILITY ANNUAL COST [USD/year]" in utility[key] and utility[key]["ELECTRICITY UTILITY ANNUAL COST [USD/year]"] > 0:
-			OPEX["Utility"] += utility[key]["ELECTRICITY UTILITY ANNUAL COST [USD/year]"]
+			OPEX["Utility"][1] += utility[key]["ELECTRICITY UTILITY ANNUAL COST [USD/year]"]
 		if "COOLING UTILITY ANNUAL COST [USD/year]" in utility[key] and utility[key]["COOLING UTILITY ANNUAL COST [USD/year]"] > 0:
-			OPEX["Utility"] += utility[key]["COOLING UTILITY ANNUAL COST [USD/year]"]
+			OPEX["Utility"][1] += utility[key]["COOLING UTILITY ANNUAL COST [USD/year]"]
 		if "HOT UTILITY ANNUAL COST [USD/year]" in utility[key] and utility[key]["HOT UTILITY ANNUAL COST [USD/year]"] > 0:
-			OPEX["Utility"] += utility[key]["HOT UTILITY ANNUAL COST [USD/year]"]
+			OPEX["Utility"][1] += utility[key]["HOT UTILITY ANNUAL COST [USD/year]"]
 
-	OPEX["Matinenenance (M)"] = CAPEX["Fixed capital investment (FCI)"][1] * 0.01
-	OPEX["Operating supplies"] = OPEX["Matinenenance (M)"] * 0.1
+	OPEX["Matinenenance (M)"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.01)
+	OPEX["Operating supplies"].append(OPEX["Matinenenance (M)"][1] * 0.1)
 
 
 
-	OPEX["OPEX"] = 1.35135135135 * (CAPEX["Fixed capital investment (FCI)"][1] * 0.026 + (OPEX["Utility"] + OPEX["Raw materials"]))
-	OPEX["Operating labor (OL)"] = OPEX["OPEX"] * 0.1
-	OPEX["Supervision and support labor (S)"] = OPEX["Operating labor (OL)"] * 0.3
-	OPEX["Laboratory charges"] = OPEX["Operating labor (OL)"] * 0.1
-	OPEX["Plant overhead cost(OVHD)"] = 0.5 * (OPEX["Matinenenance (M)"] + OPEX["Operating labor (OL)"] + OPEX["Supervision and support labor (S)"])
-	OPEX["Direct production cost (DPC)"] = OPEX["Raw materials"] + OPEX["Utility"] + OPEX["Matinenenance (M)"] + OPEX["Operating labor (OL)"] + OPEX["Supervision and support labor (S)"] + OPEX["Operating supplies"] + OPEX["Laboratory charges"]
+	OPEX["OPEX"].append(1.35135135135 * (CAPEX["Fixed capital investment (FCI)"][1] * 0.026 + (OPEX["Utility"][1] + OPEX["Raw materials"][1])))
+	OPEX["Operating labor (OL)"].append(OPEX["OPEX"][1] * 0.1)
+	OPEX["Supervision and support labor (S)"].append(OPEX["Operating labor (OL)"][1] * 0.3)
+	OPEX["Laboratory charges"].append(OPEX["Operating labor (OL)"][1] * 0.1)
+	OPEX["Plant overhead cost(OVHD)"].append(0.5 * (OPEX["Matinenenance (M)"][1] + OPEX["Operating labor (OL)"][1] + OPEX["Supervision and support labor (S)"][1]))
+	OPEX["Direct production cost (DPC)"].append(OPEX["Raw materials"][1] + OPEX["Utility"][1] + OPEX["Matinenenance (M)"][1] + OPEX["Operating labor (OL)"][1] + OPEX["Supervision and support labor (S)"][1] + OPEX["Operating supplies"][1] + OPEX["Laboratory charges"][1])
 
-	OPEX["Admistrative cost"] = OPEX["Operating labor (OL)"] * 0.15
-	OPEX["Distribution and marketing"] = OPEX["OPEX"] * 0.02
-	OPEX["R&D cost"] = OPEX["OPEX"] * 0.02
-	OPEX["General expenses"] = OPEX["Admistrative cost"] + OPEX["Distribution and marketing"] + OPEX["R&D cost"]
+	OPEX["Admistrative cost"].append(OPEX["Operating labor (OL)"][1] * 0.15)
+	OPEX["Distribution and marketing"].append(OPEX["OPEX"][1] * 0.02)
+	OPEX["R&D cost"].append(OPEX["OPEX"][1] * 0.02)
+	OPEX["General expenses"].append(OPEX["Admistrative cost"][1] + OPEX["Distribution and marketing"][1] + OPEX["R&D cost"][1])
 
 def calProfitAnalysis(CAPEX, OPEX, profitAnalysis, lawMaterialData):
 	product = ""
@@ -188,7 +187,7 @@ def calProfitAnalysis(CAPEX, OPEX, profitAnalysis, lawMaterialData):
 			break
 
 	profitAnalysis[" "] = product
-	profitAnalysis["OPEX"] = OPEX["OPEX"]
+	profitAnalysis["OPEX"] = OPEX["OPEX"][1]
 	profitAnalysis["Depreciation [USD/yr]"] = CAPEX["Fixed capital investment (FCI)"][1] / profitAnalysisData["depreciationLifetime"]
 	for output_stream in outputFlowData:
 		material = outputFlowData[output_stream]
@@ -196,4 +195,4 @@ def calProfitAnalysis(CAPEX, OPEX, profitAnalysis, lawMaterialData):
 		for key in material:
 			profitAnalysis[output_stream + " annual amount of product [ton/yr]"] += lawMaterialData[key] * calcOPEXdata["plantOperationHours"] * lawMaterialWeightData[key] / 1000  # ton/yr
 		profitAnalysis[output_stream + " manufacturing cost [USD/ton]"] = 0
-		profitAnalysis[output_stream + " manufacturing cost [USD/ton]"] = (profitAnalysis["OPEX"] + profitAnalysis["Depreciation [USD/yr]"]) / profitAnalysis[output_stream + "annual amount of product [ton/yr]"]
+		profitAnalysis[output_stream + " manufacturing cost [USD/ton]"] = (profitAnalysis["OPEX"] + profitAnalysis["Depreciation [USD/yr]"]) / profitAnalysis[output_stream + " annual amount of product [ton/yr]"]

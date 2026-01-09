@@ -2,7 +2,7 @@
 from Parse import parseTEA, parseHEX, parseCOMP, parseCAPCOSTParam, parseUtility, parseLawMaterial, parseEQUIP, parseLawMaterialExcelData
 from Utility import calEquipmentCost, printout, inputRTX
 from Calc import calCAPEX, calUtility, calOPEX, calProfitAnalysis
-
+from ExcelParse import parseUtilityParam, parseEquipmentParam
 inputData = {}
 inputfile = "./input/input.xlsx"
 inputrep = "./input/input.rep"
@@ -13,6 +13,8 @@ OPEX = {}
 utility =  {}
 profitAnalysis = {}
 
+parseUtilityParam()
+parseEquipmentParam() 
 try:
 	parseLawMaterialExcelData()
 	parseTEA(inputfile, inputData)

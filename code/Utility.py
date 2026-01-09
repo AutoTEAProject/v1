@@ -201,11 +201,13 @@ def printout(inputData, cost, utility, CAPEX, OPEX, profitAnalysis):
 # 2️⃣ 데이터 추가
     for name, row in inputData.items():
         ws.append([name] + [row[col] for col in columns[1:]])  # 첫 열은 name, 나머지는 columns 순서대로
+    autofit(ws)
 
     # 시트 2: UTILITY
     ws2 = wb.create_sheet("UTILITY")
     for r in dataframe_to_rows(pd.DataFrame(utility), header=True): ws2.append(r)
-
+    autofit(ws2)
+    
     # 시트 3: CAPCOST (블럭 스타일)
     ws3 = wb.create_sheet("Equipment Cost")
     for k,v in cost.items():

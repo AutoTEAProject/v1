@@ -193,8 +193,6 @@ def printout(inputData, cost, utility, CAPEX, OPEX, profitAnalysis):
     wb = Workbook()
     ws = wb.active
     ws.title = "parse"
-    # 헤더 추가
-    # ws.append(columns)
     # # 데이터 추가
     ws.append(columns)
 

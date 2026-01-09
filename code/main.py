@@ -13,9 +13,9 @@ OPEX = {}
 utility =  {}
 profitAnalysis = {}
 
-parseUtilityParam()
-parseEquipmentParam() 
 try:
+	parseUtilityParam()
+	parseEquipmentParam() 
 	parseLawMaterialExcelData()
 	parseTEA(inputfile, inputData)
 	parseEQUIP(inputrep, inputData)

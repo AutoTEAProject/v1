@@ -3,6 +3,7 @@ from Parse import parseTEA, parseHEX, parseCOMP, parseCAPCOSTParam, parseUtility
 from Utility import calEquipmentCost, printout, inputRTX
 from Calc import calCAPEX, calUtility, calOPEX, calProfitAnalysis
 from ExcelParse import parseUtilityParam, parseEquipmentParam
+
 inputData = {}
 inputfile = "./input/input.xlsx"
 inputrep = "./input/input.rep"

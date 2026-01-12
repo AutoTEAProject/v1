@@ -288,7 +288,7 @@ def	parseUtility(inputData, repfFileName, utility):
 							}
 					# error
 					# COMP TEA에서 계산해주면 그걸 우선으로 사용
-					if (name == "HEX"):
+					if (inputData[name]["Type"] == "HEX"):
 						parseflag = 0
 					else:
 						parseflag = 1
@@ -304,6 +304,8 @@ def	parseUtility(inputData, repfFileName, utility):
 			if (len(temp3) > 1):
 				for i in range(int(temp3[1])):
 					num *=  10
+			if (num < 0):
+				num = num * -1
 			if (parseflag == 2):
 				utility[name] = {
 					"COOLING UTILITY[kg/hr]": num
@@ -332,6 +334,8 @@ def	parseUtility(inputData, repfFileName, utility):
 				num = temp[0]
 			# num 단위변환
 			num *= 0.004184 # CAL/SEC -> KW
+			if (num < 0):
+				num = num * -1
 			utility[name] = {
 				"HOT UTILITY[kW]":num
 			}

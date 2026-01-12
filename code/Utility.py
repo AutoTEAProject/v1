@@ -1,6 +1,6 @@
 import math
 from copy import deepcopy
-from enums import Index
+from enums import EquipLen
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -8,71 +8,72 @@ from openpyxl.styles import Font
 from data import HeaterParam, HeatExchangerParam, CompressorParam, ReactParam
 from openpyxl import load_workbook
 
-# RGIBBS, FLASH2, RADFRAC, RSTOIC, FSPLIT, FLASH3, DUPL, VALVE, HEATER, COMPR, HEATX, MIXER
 
 def checkType(name): 
 	length = len(name)
-	NGLen = 2
-	HTXLen = 3
-	HEXLen = 3
-	SEPLen = 3
-	MIXLen = 3
-	PFRLen = 3
-	COMPLen = 4
-	COOLLen = 4
-	SPFRLen = 4
-	DISTLen = 4
-	HEATXLen = 5
-	REACTLen = 5
-	FLASHLen = 5
-	VALVELen = 5
-	SPLITLen = 5
-	HEATERLen = 6
-	RGIBBSLen = 6
-	RSTOICLen = 6
-	RADFRACLen = 7
-	DUPLLen = 4
 	
 	for i in range(0, length):
-		if (length - i >= NGLen and name[i:i + NGLen] == "NG"):
-			return "HTX"
-		elif (length - i >= HTXLen and name[i:i + HTXLen] == "HTX"):
-			return "HTX"
-		elif (length - i >= HEATERLen and name[i:i + HEATERLen] == "HEATER"):
-			return "HTX"
-		elif (length - i >= SEPLen and name[i:i + SEPLen] == "SEP"):
-			return "SEP"
-		elif (length - i >= HEXLen and name[i:i + HEXLen] == "HEX"):
-			return "HEX"
-		elif (length - i >= MIXLen and name[i:i + MIXLen] == "MIX"):
+		# Mixer part
+		if (length - i >= EquipLen.MIXER and name[i:i + EquipLen.MIXER] == "MIXER"):
 			return "MIX"
-		elif (length - i >= COMPLen and name[i:i + COMPLen] == "COMP"):
-			return "COMP"
-		elif (length - i >= COOLLen and name[i:i + COOLLen] == "COOL"):
-			return "COOL" 
-		elif (length - i >= FLASHLen and name[i:i + FLASHLen] == "FLASH"):
+		elif (length - i >= EquipLen.SSPLIT and name[i:i + EquipLen.SSPLIT] == "SSPLIT"):
+			return "MIX"
+		elif (length - i >= EquipLen.FSPLIT and name[i:i + EquipLen.FSPLIT] == "FSPLIT"):
+			return "MIX"
+		# Seperate part
+		elif (length - i >= EquipLen.FLASH2 and name[i:i + EquipLen.FLASH2] == "FLASH2"):
 			return "FLASH"
-		elif (length - i >= HEATXLen and name[i:i + HEATXLen] == "HEATX"):
+		elif (length - i >= EquipLen.FLASH3 and name[i:i + EquipLen.FLASH3] == "FLASH3"):
+			return "FLASH"
+		elif (length - i >= EquipLen.SEP and name[i:i + EquipLen.SEP] == "SEP"):
+			return "SEP"
+		elif (length - i >= EquipLen.SEP2 and name[i:i + EquipLen.SEP2] == "SEP2"):
+			return "SEP"
+		# Exchanger part
+		elif (length - i >= EquipLen.HEATER and name[i:i + EquipLen.HEATER] == "HEATER"):
+			return "HTX"
+		elif (length - i >= EquipLen.HEATX and name[i:i + EquipLen.HEATX] == "HEATX"):
 			return "HEX"
-		elif (length - i >= VALVELen and name[i:i + VALVELen] == "VALVE"):
-			return "MIX"
-		elif (length - i >= SPLITLen and name[i:i + SPLITLen] == "SPLIT"):
-			return "MIX"
-		elif (length - i >= PFRLen and name[i:i + PFRLen] == "PFR"):
-			return "REACT"
-		elif (length - i >= SPFRLen and name[i:i + SPFRLen] == "SPFR"):
-			return "REACT"
-		elif (length - i >= REACTLen and name[i:i + REACTLen] == "REACT"):
-			return "REACT"
-		elif (length - i >= RGIBBSLen and name[i:i + RGIBBSLen] == "RGIBBS"):
-			return "REACT"
-		elif (length - i >= RSTOICLen and name[i:i + RSTOICLen] == "RSTOIC"):
-			return "REACT"
-		elif (length - i >= DISTLen and name[i:i + DISTLen] == "DIST"):
+		elif (length - i >= EquipLen.MHEATX and name[i:i + EquipLen.MHEATX] == "MHEATX"):
+			return "HEX"
+		elif (length - i >= EquipLen.HXFLUX and name[i:i + EquipLen.HXFLUX] == "HXFLUX"):
+			return "HEX"
+		# Column part
+		elif (length - i >= EquipLen.DSTWU and name[i:i + EquipLen.DSTWU] == "DSTWU"):
 			return "DIST"
-		elif (length - i >= RADFRACLen and name[i:i + RADFRACLen] == "RADFRAC"):
+		elif (length - i >= EquipLen.DISTL and name[i:i + EquipLen.DISTL] == "DISTL"):
 			return "DIST"
-		elif (length - i >= DUPLLen and name[i:i + DUPLLen] == "DUPL"):
+		elif (length - i >= EquipLen.RADFRAC and name[i:i + EquipLen.RADFRAC] == "RADFRAC"):
+			return "DIST"
+		elif (length - i >= EquipLen.PETROFRAC and name[i:i + EquipLen.PETROFRAC] == "PETROFRAC"):
+			return "DIST"
+		# Reactor Part
+		elif (length - i >= EquipLen.RSTOIC and name[i:i + EquipLen.RSTOIC] == "RSTOIC"):
+			return "REACT"
+		elif (length - i >= EquipLen.RSTOIC and name[i:i + EquipLen.RSTOIC] == "RYIELD"):
+			return "REACT"
+		elif (length - i >= EquipLen.RSTOIC and name[i:i + EquipLen.RSTOIC] == "REQUIL"):
+			return "REACT"
+		elif (length - i >= EquipLen.RSTOIC and name[i:i + EquipLen.RSTOIC] == "RGIBBS"):
+			return "REACT"
+		elif (length - i >= EquipLen.RSTOIC and name[i:i + EquipLen.RSTOIC] == "RCSTR"):
+			return "REACT"
+		elif (length - i >= EquipLen.RSTOIC and name[i:i + EquipLen.RSTOIC] == "RPLUG"):
+			return "REACT"
+		# Pressure Changer Part
+		elif (length - i >= EquipLen.COMPR and name[i:i + EquipLen.COMPR] == "COMPR"):
+			return "COMP"
+		elif (length - i >= EquipLen.PUMP and name[i:i + EquipLen.PUMP] == "MCOMPR"):
+			return "COMP"
+		# 아래 두 개는 계산 아스펜에서 해줘서 원래 벨브 처리 어떻게 했는지 확인필요
+		elif (length - i >= EquipLen.PUMP and name[i:i + EquipLen.PUMP] == "PUMP"):
+			return "VALVE"
+		elif (length - i >= EquipLen.PUMP and name[i:i + EquipLen.PUMP] == "VALVE"):
+			return "VALVE"
+		# Solid Seperator Part -> aspen에서 계산해줌
+		elif (length - i >= EquipLen.CYCLONE and name[i:i + EquipLen.CYCLONE] == "CYCLONE"):
+			return "DIST"
+		elif (length - i >= EquipLen.CYCLONE and name[i:i + EquipLen.CYCLONE] == "HYCYC"):
 			return "DIST"
 	return "ETC"
 
@@ -115,20 +116,17 @@ def calEquipmentCost(inputData, cost, utility): #react도 추가해야함.
 		2. C_BM 
 		- HEX, HTX : EQUIPMENT COST * (B1 + B2*FM)
 		'''
-		if (type == "HTX" or type == "COOL"):
+		if (type == "HTX"):
 			if ("HOT UTILITY[kW]" in utility[key]):
 				utilityKey = "HOT UTILITY[kW]"
 			elif ("ELECTRICITY UTILITY[kW]" in utility[key]):
 				utilityKey = "ELECTRICITY UTILITY[kW]"
 			else:
 				utilityKey = "COOLING UTILITY[kg/hr]"
-			if(utility[key][utilityKey] < 0):
-				# error 이거 어떻게 처리해야하는거지?
-				# 이거 cooler라서 양수 전환해서 계산해야함
-				continue
+			# print(key, utility[key][utilityKey])
 			temp["Diphenyl heater"] = deepcopy(HeaterParam["Diphenyl heater"])
 			temp["Diphenyl heater"]["EQUIPMENT COST"] = ((10**(temp["Diphenyl heater"]["K1"]+temp["Diphenyl heater"]["K2"]+temp["Diphenyl heater"]["K3"]))*(utility[key][utilityKey] / 10)**(0.6)) * (798.8 / 397)
-			
+			# print(temp["Diphenyl heater"]["EQUIPMENT COST"])
 			temp["Molten salt heater"] = deepcopy(HeaterParam["Molten salt heater"])
 			temp["Molten salt heater"]["EQUIPMENT COST"] = ((10**(temp["Molten salt heater"]["K1"]+temp["Molten salt heater"]["K2"]+temp["Molten salt heater"]["K3"]))*(utility[key][utilityKey] / 10)**(0.6)) * (798.8 / 397)
 			
@@ -166,6 +164,7 @@ def calEquipmentCost(inputData, cost, utility): #react도 추가해야함.
 			temp["ATEA"] = {}
 			temp["ATEA"]["EQUIPMENT COST"] = inputData[key]["EquipmentCost"]
 		cost[key] = deepcopy(temp)
+		# print(cost[key])
 	 
 # 이제 여기서 Capacity 값은 각 모듈별로 파싱해서 저장해둬야함.
 def safe_df(df):
@@ -209,6 +208,7 @@ def printout(inputData, cost, utility, CAPEX, OPEX, profitAnalysis):
     # 시트 3: CAPCOST (블럭 스타일)
     ws3 = wb.create_sheet("Equipment Cost")
     for k,v in cost.items():
+        # print(k, v)
         df = pd.DataFrame(v).T   # 행열 전치 추가!
         write_block(ws3, df, k)
     autofit(ws3)

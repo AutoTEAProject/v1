@@ -7,7 +7,7 @@ from enums import Index
 from data import lawMaterialCostData, lawMaterialWeightData, outputFlowData
 
 def parseInputMaterial():
-	filename = "./input/Material/MaterialData.xlsx"
+	filename = "./input/MaterialData.xlsx"
 	df = pd.read_excel(io = filename, sheet_name='input', header=1, engine='openpyxl')
 	length = len(df)
 	for i in range(length):
@@ -20,7 +20,7 @@ def parseInputMaterial():
 		lawMaterialWeightData[material] = weight
 
 def parseOutputMaterial():
-	filename = "./input/Material/MaterialData.xlsx"
+	filename = "./input/MaterialData.xlsx"
 	df = pd.read_excel(io = filename, sheet_name='output', header=1, engine='openpyxl')
 	length = len(df)
 	for i in range(length):

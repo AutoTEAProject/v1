@@ -6,6 +6,37 @@ from Utility import checkType, calMaterialWeight
 from enums import Index
 from data import lawMaterialCostData, lawMaterialWeightData, outputFlowData
 
+def parseFlowData(filename, flowName):
+	fd2 = open(filename, mode='r')
+	lines = fd2.readlines()
+	data = {}
+	inBlock = False
+	start = False
+	find = False
+	for line in lines:
+		if ("                                 STREAM SECTION                                 " in line):
+			inBlock = True
+			continue
+		if (inBlock == True and "STREAM ID" in line):
+			idx = 0
+			streamId = list(line.split())
+			for name in streamId:
+				if (name == flowName):
+					find = True
+					idx = len(streamId) - idx - 1
+					break
+				idx += 1
+			continue
+		if (inBlock == True and "TOTAL FLOW:" in line):
+			start = True
+		if (start == True and find == True and "KG/HR" in line):
+			materialData = list(line.split())
+			material = materialData[0]
+			weight = float(materialData[len(materialData) - 1 - idx].replace("-", "e-").replace("+", "e+")) # 단위 KG/HR
+			data[material] = weight
+			return (weight)
+
+
 def parseInputMaterial():
 	filename = "./input/MaterialData.xlsx"
 	df = pd.read_excel(io = filename, sheet_name='input', header=1, engine='openpyxl')
@@ -42,10 +73,33 @@ def parseOutputMaterial():
 			outputFlowData[flow].append(material)
   # flowName 받아서 이거 따로 저장해야함.
 
+def parseFlowName(flowData):
+	xlsxfilename = "./input/MaterialData.xlsx"
+	repfilename = "./input/input.rep"
+	df = pd.read_excel(io = xlsxfilename, sheet_name='FlowName', header=1, engine='openpyxl')
+	length = len(df)
+	inputFlow = {}
+	outputFlow = {}
+	
+	for i in range(length):
+		inputFlowName = df.iat[i, 1]
+		outputFlowName = df.iat[i, 4]
+		if (pd.isna(inputFlowName) and pd.isna(outputFlowName)):
+			break;
+		if (pd.isna(inputFlowName) == False):
+			cost = float(df.iat[i, 2])
+			if (pd.isna(cost)):
+				raise TypeError("input flow의 가격을 입력해 주세요. : " + inputFlowName)
+			inputFlow[inputFlowName] = {"amount" : parseFlowData(repfilename, inputFlowName), "cost" : cost} # 단위 KG/HR
+		if (pd.isna(outputFlowName) == False):
+			outputFlow[outputFlowName] = parseFlowData(repfilename, outputFlowName) # 단위 KG/HR
+	flowData["inputFlow"] = inputFlow
+	flowData["outputFlow"] = outputFlow
 
-def parseLawMaterialExcelData():
-	parseInputMaterial()
-	parseOutputMaterial()
+def parseLawMaterialExcelData(flowData):
+	parseFlowName(flowData)
+	# parseInputMaterial()
+	# parseOutputMaterial()
 
 '''
                                FLOWSHEET SECTION                                

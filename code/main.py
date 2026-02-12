@@ -1,5 +1,5 @@
 #!/opt/anaconda3/envs/myenv/bin/python
-from Parse import parseTEA, parseHEX, parseCOMP, parseCAPCOSTParam, parseUtility, parseLawMaterial, parseEQUIP, parseLawMaterialExcelData
+from Parse import parseTEA, parseHEX, parseCOMP, parseCAPCOSTParam, parseUtility, parseLawMaterial, parseEQUIP, parseLawMaterialExcelData, parseFlowData
 from Utility import calEquipmentCost, printout, inputRTX
 from Calc import calCAPEX, calUtility, calOPEX, calProfitAnalysis
 from ExcelParse import parseUtilityParam, parseEquipmentParam
@@ -13,22 +13,21 @@ CAPEX = {}
 OPEX = {}
 utility =  {}
 profitAnalysis = {}
+flowData = {}
 
 try:
 	parseUtilityParam()
 	parseEquipmentParam() 
-	parseLawMaterialExcelData()
+	parseLawMaterialExcelData(flowData)
+except Exception as e:
+	print("Error parsexlxs:", e)
+try: 
+	# parseLawMaterial(inputrep, lawMaterialData) #KMOL/HR 단위로 추출  {'H2': -1841.32, 'N2': -613.773, 'NH3': 1227.55}
 	parseTEA(inputfile, inputData)
 	parseEQUIP(inputrep, inputData)
 	parseHEX(inputfile, inputData)
 	parseCOMP(inputfile, inputData)
 	parseCAPCOSTParam(inputrep, inputData)
-
-except Exception as e:
-	print("Error parsexlxs:", e)
-try: 
-	parseLawMaterial(inputrep, lawMaterialData) #KMOL/HR 단위로 추출  {'H2': -1841.32, 'N2': -613.773, 'NH3': 1227.55}
-	parseUtility(inputData, inputrep, utility)
 	calEquipmentCost(inputData, cost, utility)
 
 except Exception as e:
@@ -38,8 +37,8 @@ try:
 	inputRTX(inputData, cost) # 여기서 reactor 엑셀에 입력하고 읽어오기
 	calCAPEX(inputData, cost, CAPEX)
 	calUtility(utility)
-	calOPEX(CAPEX, lawMaterialData, OPEX, utility)
-	calProfitAnalysis(CAPEX, OPEX, profitAnalysis, lawMaterialData)
+	calOPEX(CAPEX, flowData, OPEX, utility)
+	calProfitAnalysis(CAPEX, OPEX, profitAnalysis, flowData)
 	printout(inputData, cost, utility, CAPEX, OPEX, profitAnalysis)
 
 except Exception as e:

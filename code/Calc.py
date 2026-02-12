@@ -114,7 +114,7 @@ def calUtility(utility):
 			utility[key]["ELECTRICITY UTILITY ANNUAL COST [USD/year]"] = int(annualCost)
 
 
-def calOPEX(CAPEX, lawMaterialData, OPEX, utility):
+def calOPEX(CAPEX, flowData, OPEX, utility):
 
 	#OPEX 출력 순서 지정을 위한 전방선언
 	OPEX["OPEX (Total product costm TPC)"] = [" " ," "]
@@ -150,9 +150,12 @@ def calOPEX(CAPEX, lawMaterialData, OPEX, utility):
 	OPEX["Local taxes, Insurance"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.01)
 
 	OPEX["Raw materials"] = [" ", 0] # 이거 raw material key에 따른 알맞은 값 넣어야함.
-	for key in lawMaterialData:
-		if lawMaterialData[key] < 0:
-			OPEX["Raw materials"][1] += lawMaterialData[key] * lawMaterialCostData[key] * calcOPEXdata["plantOperationHours"] * -1 * lawMaterialWeightData[key]  # kg 단위로 바꿔주기 위해 1000으로 나눔
+	inputFlow = flowData["inputFlow"]
+	print(inputFlow)
+	for key in inputFlow:
+		print(key)
+		OPEX["Raw materials"][1] += inputFlow[key]["amount"] * inputFlow[key]["cost"] * calcOPEXdata["plantOperationHours"] / 1000  # ton 단위로 바꿔주기 위해 1000으로 나눔
+			# OPEX["Raw materials"][1] += flowData[key] * lawMaterialCostData[key] * calcOPEXdata["plantOperationHours"] * -1 * lawMaterialWeightData[key]  # kg 단위로 바꿔주기 위해 1000으로 나눔
 	OPEX["Utility"] = [" ", 0]
 	for key in utility:
 		if "ELECTRICITY UTILITY ANNUAL COST [USD/year]" in utility[key] and utility[key]["ELECTRICITY UTILITY ANNUAL COST [USD/year]"] > 0:
@@ -179,20 +182,16 @@ def calOPEX(CAPEX, lawMaterialData, OPEX, utility):
 	OPEX["R&D cost"].append(OPEX["OPEX"][1] * 0.02)
 	OPEX["General expenses"].append(OPEX["Admistrative cost"][1] + OPEX["Distribution and marketing"][1] + OPEX["R&D cost"][1])
 
-def calProfitAnalysis(CAPEX, OPEX, profitAnalysis, lawMaterialData):
+def calProfitAnalysis(CAPEX, OPEX, profitAnalysis, flowData):
 	product = ""
-	for key in lawMaterialData:
-		if lawMaterialData[key] > 0:
-			product = key
-			break
 
+	outputFlow = flowData["outputFlow"]
 	profitAnalysis[" "] = product
 	profitAnalysis["OPEX"] = OPEX["OPEX"][1]
 	profitAnalysis["Depreciation [USD/yr]"] = CAPEX["Fixed capital investment (FCI)"][1] / profitAnalysisData["depreciationLifetime"]
-	for output_stream in outputFlowData:
-		material = outputFlowData[output_stream]
-		profitAnalysis[output_stream + " annual amount of product [ton/yr]"] = 0
-		for key in material:
-			profitAnalysis[output_stream + " annual amount of product [ton/yr]"] += lawMaterialData[key] * calcOPEXdata["plantOperationHours"] * lawMaterialWeightData[key] / 1000  # ton/yr
-		profitAnalysis[output_stream + " manufacturing cost [USD/ton]"] = 0
+	for output_stream in outputFlow:
+		profitAnalysis[output_stream + " annual amount of product [ton/yr]"] = outputFlow[output_stream] * calcOPEXdata["plantOperationHours"] / 1000
+		# for key in material:
+			# profitAnalysis[output_stream + " annual amount of product [ton/yr]"] += flowData[key] * calcOPEXdata["plantOperationHours"] * lawMaterialWeightData[key] / 1000  # ton/yr
+		# profitAnalysis[output_stream + " manufacturing cost [USD/ton]"] = 0
 		profitAnalysis[output_stream + " manufacturing cost [USD/ton]"] = (profitAnalysis["OPEX"] + profitAnalysis["Depreciation [USD/yr]"]) / profitAnalysis[output_stream + " annual amount of product [ton/yr]"]

@@ -3,7 +3,7 @@ import pandas as pd
 from data import utilityCostData, calcOPEXdata, profitAnalysisData, HeaterParam, HeatExchangerParam, CompressorParam
 
 def parseUtilityParam():
-	filename = "./input/Material/MaterialData.xlsx"
+	filename = "./input/MaterialData.xlsx"
 	df = pd.read_excel(io = filename, sheet_name='Utility Parameter', header=1, engine='openpyxl')
  
 	for i in range(0, 3):
@@ -21,7 +21,7 @@ def parseUtilityParam():
 	profitAnalysisData[key] = value
 
 def parseEquipmentParam():
-	filename = "./input/Material/MaterialData.xlsx"
+	filename = "./input/MaterialData.xlsx"
 	df = pd.read_excel(io = filename, sheet_name='Equipment Cost Parameter', header=1, engine='openpyxl')
  
 	for i in range(0, 4):

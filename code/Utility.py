@@ -106,10 +106,11 @@ def calMaterialWeight(material):
 	
 
 # cost = {} # 2차원 딕셔너리로 "이름" : {딕셔너리} 이렇게 저장하고 각 유닛 종류별 인자와 계산 결과를 출력한다.
-def calEquipmentCost(inputData, cost, utility): #react도 추가해야함.
+def calEquipmentCost(inputData, cost, utility, exceptCapacity): #react도 추가해야함.
 	for key in inputData:
 		temp = {}
 		type = inputData[key]["Type"]
+		exceptflag = False
  		# 여기서 이제 cost의 값들을 하나씩 이름, 인자 순으로 저장해야함.
 		'''
 		1. EQUIPMENT COST
@@ -118,6 +119,15 @@ def calEquipmentCost(inputData, cost, utility): #react도 추가해야함.
 		2. C_BM 
 		- HEX, HTX : EQUIPMENT COST * (B1 + B2*FM)
 		'''
+
+		# for k in exceptCapacity:
+		# 	if (k == inputData[key]["Name"]):
+		# 		print(k)
+		# 		print(inputData[key]["Name"])
+		# 		exceptflag = True
+		# 		break
+		# if (exceptflag == True):
+		# 	capacity = exceptCapacity[inputData[key]["Name"]]
 		if (type == "HTX"):
 			if ("HOT UTILITY[kW]" in utility[key]):
 				utilityKey = "HOT UTILITY[kW]"
@@ -125,44 +135,50 @@ def calEquipmentCost(inputData, cost, utility): #react도 추가해야함.
 				utilityKey = "ELECTRICITY UTILITY[kW]"
 			else:
 				utilityKey = "COOLING UTILITY[kg/hr]"
-			# print(key, utility[key][utilityKey])
+			capacity = utility[key][utilityKey]
+		elif (type == "HEX"):
+			capacity = inputData[key]["HeatTransferArea"]
+		elif (type == "COMP"):
+			capacity = inputData[key]["DriverPower"]
+
+		if (type == "HTX"):
 			temp["Diphenyl heater"] = deepcopy(HeaterParam["Diphenyl heater"])
-			temp["Diphenyl heater"]["EQUIPMENT COST"] = ((10**(temp["Diphenyl heater"]["K1"]+temp["Diphenyl heater"]["K2"]+temp["Diphenyl heater"]["K3"]))*(utility[key][utilityKey] / 10)**(0.6)) * (798.8 / 397)
-			# print(temp["Diphenyl heater"]["EQUIPMENT COST"])
+			temp["Diphenyl heater"]["EQUIPMENT COST"] = ((10**(temp["Diphenyl heater"]["K1"]+temp["Diphenyl heater"]["K2"]+temp["Diphenyl heater"]["K3"]))*(capacity / 10)**(0.6)) * (798.8 / 397)
+
 			temp["Molten salt heater"] = deepcopy(HeaterParam["Molten salt heater"])
-			temp["Molten salt heater"]["EQUIPMENT COST"] = ((10**(temp["Molten salt heater"]["K1"]+temp["Molten salt heater"]["K2"]+temp["Molten salt heater"]["K3"]))*(utility[key][utilityKey] / 10)**(0.6)) * (798.8 / 397)
+			temp["Molten salt heater"]["EQUIPMENT COST"] = ((10**(temp["Molten salt heater"]["K1"]+temp["Molten salt heater"]["K2"]+temp["Molten salt heater"]["K3"]))*(capacity / 10)**(0.6)) * (798.8 / 397)
 			
 			temp["Hot water heater"] = deepcopy(HeaterParam["Hot water heater"])
-			temp["Hot water heater"]["EQUIPMENT COST"] = ((10**(temp["Hot water heater"]["K1"]+temp["Hot water heater"]["K2"]+temp["Hot water heater"]["K3"]))*(utility[key][utilityKey] / 10)**(0.6)) * (798.8 / 397)
+			temp["Hot water heater"]["EQUIPMENT COST"] = ((10**(temp["Hot water heater"]["K1"]+temp["Hot water heater"]["K2"]+temp["Hot water heater"]["K3"]))*(capacity / 10)**(0.6)) * (798.8 / 397)
 			
 			temp["Steam boiler"] = deepcopy(HeaterParam["Steam boiler"])
-			temp["Steam boiler"]["EQUIPMENT COST"] = ((10**(temp["Steam boiler"]["K1"]+temp["Steam boiler"]["K2"]+temp["Steam boiler"]["K3"]))*(utility[key][utilityKey] / 10)**(0.6)) * (798.8 / 397)
+			temp["Steam boiler"]["EQUIPMENT COST"] = ((10**(temp["Steam boiler"]["K1"]+temp["Steam boiler"]["K2"]+temp["Steam boiler"]["K3"]))*(capacity / 10)**(0.6)) * (798.8 / 397)
 		elif (type == "HEX"):
 			temp["Fixed tube"] = deepcopy(HeatExchangerParam["Fixed tube"])
-			temp["Fixed tube"]["EQUIPMENT COST"] = ((10**(temp["Fixed tube"]["K1"]+temp["Fixed tube"]["K2"]+temp["Fixed tube"]["K3"]))*(inputData[key]["HeatTransferArea"] / 10)**(0.6)) * (798.8 / 397)
+			temp["Fixed tube"]["EQUIPMENT COST"] = ((10**(temp["Fixed tube"]["K1"]+temp["Fixed tube"]["K2"]+temp["Fixed tube"]["K3"]))*(capacity / 10)**(0.6)) * (798.8 / 397)
 			
 			temp["Floating head"] = deepcopy(HeatExchangerParam["Floating head"])
-			temp["Floating head"]["EQUIPMENT COST"] = ((10**(temp["Floating head"]["K1"]+temp["Floating head"]["K2"]+temp["Floating head"]["K3"]))*(inputData[key]["HeatTransferArea"] / 10)**(0.6)) * (798.8 / 397)
+			temp["Floating head"]["EQUIPMENT COST"] = ((10**(temp["Floating head"]["K1"]+temp["Floating head"]["K2"]+temp["Floating head"]["K3"]))*(capacity / 10)**(0.6)) * (798.8 / 397)
 			
 			temp["U-tube"] = deepcopy(HeatExchangerParam["U-tube"])
-			temp["U-tube"]["EQUIPMENT COST"] = ((10**(temp["U-tube"]["K1"]+temp["U-tube"]["K2"]+temp["U-tube"]["K3"]))*(inputData[key]["HeatTransferArea"] / 10)**(0.6)) * (798.8 / 397)
+			temp["U-tube"]["EQUIPMENT COST"] = ((10**(temp["U-tube"]["K1"]+temp["U-tube"]["K2"]+temp["U-tube"]["K3"]))*(capacity / 10)**(0.6)) * (798.8 / 397)
 			
 			temp["Bayonet"] = deepcopy(HeatExchangerParam["Bayonet"])
-			temp["Bayonet"]["EQUIPMENT COST"] = ((10**(temp["Bayonet"]["K1"]+temp["Bayonet"]["K2"]+temp["Bayonet"]["K3"]))*(inputData[key]["HeatTransferArea"] / 10)**(0.6)) * (798.8 / 397)
+			temp["Bayonet"]["EQUIPMENT COST"] = ((10**(temp["Bayonet"]["K1"]+temp["Bayonet"]["K2"]+temp["Bayonet"]["K3"]))*(capacity / 10)**(0.6)) * (798.8 / 397)
 		elif (type == "COMP"):
 			temp["Centrifugal, axial and reciprocating"] = deepcopy(CompressorParam["Centrifugal, axial and reciprocating"])
 			if (inputData[key]["DriverPower"] == 0):
 				continue
 				#error
 				# 나중에 여기에 에러 처리 코드 넣기
-			temp["Centrifugal, axial and reciprocating"]["EQUIPMENT COST"] = (10**(temp["Centrifugal, axial and reciprocating"]["K1"] + temp["Centrifugal, axial and reciprocating"]["K2"] * (math.log(inputData[key]["DriverPower"], 10)) + (temp["Centrifugal, axial and reciprocating"]["K3"] * ((math.log(inputData[key]["DriverPower"], 10))**2)))) * (798.8 / 397)
+			temp["Centrifugal, axial and reciprocating"]["EQUIPMENT COST"] = (10**(temp["Centrifugal, axial and reciprocating"]["K1"] + temp["Centrifugal, axial and reciprocating"]["K2"] * (math.log(capacity, 10)) + (temp["Centrifugal, axial and reciprocating"]["K3"] * ((math.log(capacity, 10))**2)))) * (798.8 / 397)
 			temp["Rotary"] = deepcopy(CompressorParam["Rotary"])
-			temp["Rotary"]["EQUIPMENT COST"] = (10**(temp["Rotary"]["K1"] + temp["Rotary"]["K2"] * (math.log(inputData[key]["DriverPower"], 10)) + (temp["Rotary"]["K3"] * ((math.log(inputData[key]["DriverPower"], 10))**2)))) * (798.8 / 397)
+			temp["Rotary"]["EQUIPMENT COST"] = (10**(temp["Rotary"]["K1"] + temp["Rotary"]["K2"] * (math.log(capacity, 10)) + (temp["Rotary"]["K3"] * ((math.log(capacity, 10))**2)))) * (798.8 / 397)
 		elif (type == "REACT"):
 			temp["input"] = deepcopy(ReactParam["Nan"])
 			temp["input"]["EQUIPMENT COST"] = 0
 		# 여기는 이미 가격 계산 되어있으면 계산 안 하는 부분
-		if (inputData[key]["EquipmentCost"] != 0): 
+		if (key not in exceptCapacity and inputData[key]["EquipmentCost"] != 0): 
 			temp["ATEA"] = {}
 			temp["ATEA"]["EQUIPMENT COST"] = inputData[key]["EquipmentCost"]
 		cost[key] = deepcopy(temp)

@@ -100,8 +100,6 @@ def parseExceptName(exceptEquipmentcost, exceptUtility):
 	xlsxfilename = "./input/MaterialData.xlsx"
 	df = pd.read_excel(io = xlsxfilename, sheet_name='Except Unit', header=1, engine='openpyxl')
 	length = len(df)
-	inputFlow = {}
-	outputFlow = {}
 	
 	for i in range(length):
 		UtilityName = df.iat[i, 1]
@@ -113,10 +111,23 @@ def parseExceptName(exceptEquipmentcost, exceptUtility):
 		if (pd.isna(EquipmentName) == False):
 			exceptEquipmentcost.append(EquipmentName)
 
-def parseLawMaterialExcelData(flowData, exceptEquipmentcost, exceptUtility):
+def parseCapacity(exceptCapacity):
+	xlsxfilename = "./input/MaterialData.xlsx"
+	df = pd.read_excel(io = xlsxfilename, sheet_name='Capacity', header=1, engine='openpyxl')
+	length = len(df)
+
+	for i in range(length):
+		EquipmentName = df.iat[i, 1]
+		capacity = df.iat[i, 2]
+		if (pd.isna(EquipmentName) and pd.isna(capacity)):
+			break;
+		if (pd.isna(EquipmentName) == False):
+			exceptCapacity[EquipmentName] = float(capacity)
+
+def parseLawMaterialExcelData(flowData, exceptEquipmentcost, exceptUtility, exceptCapacity):
 	parseFlowName(flowData)
 	parseExceptName(exceptEquipmentcost, exceptUtility)
-	
+	parseCapacity(exceptCapacity)
 	# parseInputMaterial()
 	# parseOutputMaterial()
 
@@ -413,7 +424,7 @@ def parseMPS(inputData, repfFileName, utility):
     -> 이제 이걸로 Utility값 읽어와서 파일에 출력하면 끝
 '''
 
-def	parseUtility(inputData, repfFileName, utility):
+def	parseUtility(inputData, repfFileName, utility, exceptCapacity):
 	fd = open(repfFileName, mode='r')
 	lines = fd.readlines()
 	parseflag = 1
@@ -431,8 +442,13 @@ def	parseUtility(inputData, repfFileName, utility):
 							utility[name] = {
 								"ELECTRICITY UTILITY[kW]": inputData[key]["DriverPower"]
 							}
+						if name in exceptCapacity:
+							utility[name] = {
+							"ELECTRICITY UTILITY[kW]": exceptCapacity[name]
+						}
 					# error
 					# COMP TEA에서 계산해주면 그걸 우선으로 사용
+						
 					if (inputData[name]["Type"] == "HEX"):
 						parseflag = 0
 					else:
@@ -455,10 +471,19 @@ def	parseUtility(inputData, repfFileName, utility):
 				utility[name] = {
 					"COOLING UTILITY[kg/hr]": num
 				}
+				if name in exceptCapacity:
+					utility[name] = {
+					"COOLING UTILITY[kg/hr]": exceptCapacity[name]
+					}
 			if (parseflag == 3):
 				utility[name] = {
 					"ELECTRICITY UTILITY[kW]": num
 				}
+				if name in exceptCapacity:
+					utility[name] = {
+					"ELECTRICITY UTILITY[kW]": exceptCapacity[name]
+					}
+				
 	
 		if (parseflag == 1 and "HEAT DUTY" in line and "CAL/SEC" in line):
 			temp = list(line.split("CAL/SEC"))
@@ -484,6 +509,10 @@ def	parseUtility(inputData, repfFileName, utility):
 			utility[name] = {
 				"HOT UTILITY[kW]":num
 			}
+			if name in exceptCapacity:
+				utility[name] = {
+				"HOT UTILITY[kW]": exceptCapacity[name]
+				}
 
 
 #이제 예쁘게 출력만 하면 완성이다~

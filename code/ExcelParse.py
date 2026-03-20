@@ -9,16 +9,16 @@ def parseUtilityParam():
 	for i in range(0, 3):
 		key = df.iat[i, 1]
 		value = df.iat[i, 2]
-		utilityCostData[key] = value
+		utilityCostData[key] = float(value)
 
 	for i in range(6, 8):
 		key = df.iat[i, 1]
 		value = df.iat[i, 2]
-		calcOPEXdata[key] = value
+		calcOPEXdata[key] = float(value)
  
 	key = df.iat[11, 1]
 	value = df.iat[11, 2]
-	profitAnalysisData[key] = value
+	profitAnalysisData[key] = float(value)
 
 def parseEquipmentParam():
 	filename = "./input/MaterialData.xlsx"

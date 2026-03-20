@@ -1,9 +1,9 @@
 #!/opt/anaconda3/envs/myenv/bin/python
-from Parse import parseTEA, parseHEX, parseCOMP, parseCAPCOSTParam, parseUtility, parseLawMaterial, parseEQUIP, parseLawMaterialExcelData, parseFlowData
+from Parse import parseTEA, parseHEX, parseCOMP, parseCAPCOSTParam, parseUtility, parseLawMaterial, parseEQUIP, parseLawMaterialExcelData, parseFlowData, parseMPSG
 from Utility import calEquipmentCost, printout, inputRTX
 from Calc import calCAPEX, calUtility, calOPEX, calProfitAnalysis
 from ExcelParse import parseUtilityParam, parseEquipmentParam
-
+from data import calcOPEXdata
 inputData = {}
 inputfile = "./input/input.xlsx"
 inputrep = "./input/input.rep"
@@ -14,11 +14,13 @@ OPEX = {}
 utility =  {}
 profitAnalysis = {}
 flowData = {}
+exceptUtility = []
+exceptEquipmentcost = []
 
 try:
 	parseUtilityParam()
 	parseEquipmentParam() 
-	parseLawMaterialExcelData(flowData)
+	parseLawMaterialExcelData(flowData, exceptEquipmentcost, exceptUtility)
 except Exception as e:
 	print("Error parsexlxs:", e)
 try: 
@@ -28,6 +30,8 @@ try:
 	parseHEX(inputfile, inputData)
 	parseCOMP(inputfile, inputData)
 	parseCAPCOSTParam(inputrep, inputData)
+	parseUtility(inputData, inputrep, utility)
+	parseMPSG(inputData, inputrep, utility)
 	calEquipmentCost(inputData, cost, utility)
 
 except Exception as e:
@@ -35,8 +39,8 @@ except Exception as e:
 
 try:
 	inputRTX(inputData, cost) # 여기서 reactor 엑셀에 입력하고 읽어오기
-	calCAPEX(inputData, cost, CAPEX)
-	calUtility(utility)
+	calCAPEX(inputData, cost, CAPEX, exceptEquipmentcost)
+	calUtility(utility, exceptUtility)
 	calOPEX(CAPEX, flowData, OPEX, utility)
 	calProfitAnalysis(CAPEX, OPEX, profitAnalysis, flowData)
 	printout(inputData, cost, utility, CAPEX, OPEX, profitAnalysis)

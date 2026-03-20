@@ -4,7 +4,7 @@ import datetime
 import math
 from Utility import checkType, calMaterialWeight
 from enums import Index
-from data import lawMaterialCostData, lawMaterialWeightData, outputFlowData, calcOPEXdata
+from data import lawMaterialCostData, lawMaterialWeightData, outputFlowData, utilityCostData
 
 def parseFlowData(filename, flowName):
 	fd2 = open(filename, mode='r')
@@ -116,6 +116,7 @@ def parseExceptName(exceptEquipmentcost, exceptUtility):
 def parseLawMaterialExcelData(flowData, exceptEquipmentcost, exceptUtility):
 	parseFlowName(flowData)
 	parseExceptName(exceptEquipmentcost, exceptUtility)
+	
 	# parseInputMaterial()
 	# parseOutputMaterial()
 
@@ -302,13 +303,11 @@ def parseMPSG(inputData, repfFileName, utility):
 			endflag = True
 			line = line.strip()
 			parts = line.split()
-			print(parts)
 			for key in inputData:
 				if (inputData[key]["Name"] == parts[0]):
 					endflag = False
 			# 이제 MPSG 저장하면 됨
 			name = parts[0]
-			# 1 \, \text{cal/s} = 4.184 \, \text{J/s} = 4.184 \, \text{W} = 0.004184 \, \text{kW}
 			for key in inputData:
 				if (inputData[key]["Name"] == name):
 						temp3 = list(parts[3].split('+'))
@@ -317,10 +316,10 @@ def parseMPSG(inputData, repfFileName, utility):
 							for i in range(int(temp3[1])):
 								num *=  10
 						MPSG_rate = num
-						MPSG_percost = float(parts[4])
+						MPSG_percost = num * utilityCostData["StreamPrice(MPS)"] * -1
 						utility[name].update({
 							"MPSG_rate[KG/HR]": MPSG_rate, 
-							"MPSG UTILITY UTILITY COST [USD/hr]": MPSG_percost
+							"MPSG UTILITY COST [USD/HR]": MPSG_percost
 						})
 			if (endflag == True):
 				break;
@@ -340,13 +339,11 @@ def parseMPS(inputData, repfFileName, utility):
 			endflag = True
 			line = line.strip()
 			parts = line.split()
-			print(parts)
 			for key in inputData:
 				if (inputData[key]["Name"] == parts[0]):
 					endflag = False
 			# 이제 MPS 저장하면 됨
 			name = parts[0]
-			# 1 \, \text{cal/s} = 4.184 \, \text{J/s} = 4.184 \, \text{W} = 0.004184 \, \text{kW}
 			for key in inputData:
 				if (inputData[key]["Name"] == name):
 						temp3 = list(parts[3].split('+'))
@@ -355,15 +352,14 @@ def parseMPS(inputData, repfFileName, utility):
 							for i in range(int(temp3[1])):
 								num *=  10
 						MPS_rate = num
-						MPS_percost = float(parts[4])
+						MPS_percost = num * utilityCostData["StreamPrice(MPS)"]
 						utility[name].update({
 							"MPS_rate[KG/HR]": MPS_rate, 
-							"MPS UTILITY UTILITY COST [USD/hr]": MPS_percost
+							"MPS UTILITY COST [USD/HR]": MPS_percost
 						})
 			if (endflag == True):
 				break;
 		if ("UTILITY USAGE:" in line and "MPS " in line):
-			print(line)
 			blockflag += 1
 		if (blockflag == 2 and "  --------  " in line):
 			startflag = True

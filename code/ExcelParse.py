@@ -6,7 +6,7 @@ def parseUtilityParam():
 	filename = "./input/MaterialData.xlsx"
 	df = pd.read_excel(io = filename, sheet_name='Utility Parameter', header=1, engine='openpyxl')
  
-	for i in range(0, 3):
+	for i in range(0, 4):
 		key = df.iat[i, 1]
 		value = df.iat[i, 2]
 		utilityCostData[key] = float(value)

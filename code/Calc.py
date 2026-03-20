@@ -94,13 +94,13 @@ def calUtility(utility, exceptUtility):
 			usage = utility[key]["MPSG_rate[KG/HR]"]
 			annualUsage = usage * int(calcOPEXdata["plantOperationHours"]) #kg/year
 			utility[key]["MPSG UTILITY ANNUAL USAGE [kg/year]"] = int(annualUsage)
-			annualCost = utility[key]["MPSG UTILITY UTILITY COST [USD/hr]"] * calcOPEXdata["plantOperationHours"] #USD/year
+			annualCost = utility[key]["MPSG UTILITY COST [USD/HR]"] * calcOPEXdata["plantOperationHours"] #USD/year
 			utility[key]["MPSG UTILITY ANNUAL COST [USD/year]"] = int(annualCost)
 		elif ("MPS_rate[KG/HR]" in utility[key]):
 			usage = utility[key]["MPS_rate[KG/HR]"]
 			annualUsage = usage * int(calcOPEXdata["plantOperationHours"]) #kg/year
 			utility[key]["MPS UTILITY ANNUAL USAGE [kg/year]"] = int(annualUsage)
-			annualCost = utility[key]["MPS UTILITY UTILITY COST [USD/hr]"] * calcOPEXdata["plantOperationHours"] #USD/year
+			annualCost = utility[key]["MPS UTILITY COST [USD/HR]"] * calcOPEXdata["plantOperationHours"] #USD/year
 			utility[key]["MPS UTILITY ANNUAL COST [USD/year]"] = int(annualCost)
 		elif "COOLING UTILITY[kg/hr]" in utility[key]:
 			usage = utility[key]["COOLING UTILITY[kg/hr]"]
@@ -167,9 +167,7 @@ def calOPEX(CAPEX, flowData, OPEX, utility):
 
 	OPEX["Raw materials"] = [" ", 0] # 이거 raw material key에 따른 알맞은 값 넣어야함.
 	inputFlow = flowData["inputFlow"]
-	# print(inputFlow)
 	for key in inputFlow:
-		# print(key)
 		OPEX["Raw materials"][1] += inputFlow[key]["amount"] * inputFlow[key]["cost"] * calcOPEXdata["plantOperationHours"] / 1000  # ton 단위로 바꿔주기 위해 1000으로 나눔
 			# OPEX["Raw materials"][1] += flowData[key] * lawMaterialCostData[key] * calcOPEXdata["plantOperationHours"] * -1 * lawMaterialWeightData[key]  # kg 단위로 바꿔주기 위해 1000으로 나눔
 	OPEX["Utility"] = [" ", 0]

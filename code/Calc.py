@@ -96,6 +96,12 @@ def calUtility(utility, exceptUtility):
 			utility[key]["MPSG UTILITY ANNUAL USAGE [kg/year]"] = int(annualUsage)
 			annualCost = utility[key]["MPSG UTILITY UTILITY COST [USD/hr]"] * calcOPEXdata["plantOperationHours"] #USD/year
 			utility[key]["MPSG UTILITY ANNUAL COST [USD/year]"] = int(annualCost)
+		elif ("MPS_rate[KG/HR]" in utility[key]):
+			usage = utility[key]["MPS_rate[KG/HR]"]
+			annualUsage = usage * int(calcOPEXdata["plantOperationHours"]) #kg/year
+			utility[key]["MPS UTILITY ANNUAL USAGE [kg/year]"] = int(annualUsage)
+			annualCost = utility[key]["MPS UTILITY UTILITY COST [USD/hr]"] * calcOPEXdata["plantOperationHours"] #USD/year
+			utility[key]["MPS UTILITY ANNUAL COST [USD/year]"] = int(annualCost)
 		elif "COOLING UTILITY[kg/hr]" in utility[key]:
 			usage = utility[key]["COOLING UTILITY[kg/hr]"]
 			if (usage < 0):
@@ -176,6 +182,8 @@ def calOPEX(CAPEX, flowData, OPEX, utility):
 			OPEX["Utility"][1] += utility[key]["HOT UTILITY ANNUAL COST [USD/year]"]
 		elif "MPSG UTILITY ANNUAL COST [USD/year]" in utility[key] and utility[key]["MPSG UTILITY ANNUAL COST [USD/year]"] > 0:
 			OPEX["Utility"][1] += utility[key]["MPSG UTILITY ANNUAL COST [USD/year]"]
+		elif "MPS UTILITY ANNUAL COST [USD/year]" in utility[key] and utility[key]["MPS UTILITY ANNUAL COST [USD/year]"] > 0:
+			OPEX["Utility"][1] += utility[key]["MPS UTILITY ANNUAL COST [USD/year]"]
 
 	OPEX["Matinenenance (M)"].append(CAPEX["Fixed capital investment (FCI)"][1] * 0.01)
 	OPEX["Operating supplies"].append(OPEX["Matinenenance (M)"][1] * 0.1)

@@ -317,7 +317,7 @@ def parseMPSG(inputData, repfFileName, utility):
 							for i in range(int(temp3[1])):
 								num *=  10
 						MPSG_rate = num
-						MPSG_percost = float(parts[4]) * -1
+						MPSG_percost = float(parts[4])
 						utility[name].update({
 							"MPSG_rate[KG/HR]": MPSG_rate, 
 							"MPSG UTILITY UTILITY COST [USD/hr]": MPSG_percost
@@ -325,6 +325,45 @@ def parseMPSG(inputData, repfFileName, utility):
 			if (endflag == True):
 				break;
 		if ("UTILITY USAGE:" in line and "MPSG" in line):
+			blockflag += 1
+		if (blockflag == 2 and "  --------  " in line):
+			startflag = True
+			
+def parseMPS(inputData, repfFileName, utility):
+	fd = open(repfFileName, mode='r')
+	lines = fd.readlines()
+	blockflag = 0;
+	startflag = False;
+ 
+	for line in lines:
+		if (startflag == True):
+			endflag = True
+			line = line.strip()
+			parts = line.split()
+			print(parts)
+			for key in inputData:
+				if (inputData[key]["Name"] == parts[0]):
+					endflag = False
+			# 이제 MPS 저장하면 됨
+			name = parts[0]
+			# 1 \, \text{cal/s} = 4.184 \, \text{J/s} = 4.184 \, \text{W} = 0.004184 \, \text{kW}
+			for key in inputData:
+				if (inputData[key]["Name"] == name):
+						temp3 = list(parts[3].split('+'))
+						num = float(temp3[0])
+						if (len(temp3) > 1):
+							for i in range(int(temp3[1])):
+								num *=  10
+						MPS_rate = num
+						MPS_percost = float(parts[4])
+						utility[name].update({
+							"MPS_rate[KG/HR]": MPS_rate, 
+							"MPS UTILITY UTILITY COST [USD/hr]": MPS_percost
+						})
+			if (endflag == True):
+				break;
+		if ("UTILITY USAGE:" in line and "MPS " in line):
+			print(line)
 			blockflag += 1
 		if (blockflag == 2 and "  --------  " in line):
 			startflag = True

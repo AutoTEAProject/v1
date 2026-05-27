@@ -5,7 +5,7 @@ import pandas as pd
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.styles import Font
-from data import HeaterParam, HeatExchangerParam, CompressorParam, ReactParam, atomicWeight
+from data import HeaterParam, HeatExchangerParam, CompressorParam, reactorParam, ReactParam, atomicWeight
 from openpyxl import load_workbook
 
 
@@ -175,8 +175,13 @@ def calEquipmentCost(inputData, cost, utility, exceptCapacity): #react도 추가
 			temp["Rotary"] = deepcopy(CompressorParam["Rotary"])
 			temp["Rotary"]["EQUIPMENT COST"] = (10**(temp["Rotary"]["K1"] + temp["Rotary"]["K2"] * (math.log(capacity, 10)) + (temp["Rotary"]["K3"] * ((math.log(capacity, 10))**2)))) * (798.8 / 397)
 		elif (type == "REACT"):
-			temp["input"] = deepcopy(ReactParam["Nan"])
-			temp["input"]["EQUIPMENT COST"] = 0
+			if key in reactorParam:
+				print("HELLO!!!!!!!!!!")
+				temp["input"] = deepcopy(reactorParam[key])
+				temp["input"]["EQUIPMENT COST"] = (10**(reactorParam[key]["K1"] + reactorParam[key]["K2"] * (math.log(reactorParam[key]["Capacity (Feed) [ton/d]"], 10)) + (reactorParam[key]["K3"] * ((math.log(reactorParam[key]["Capacity (Feed) [ton/d]"], 10))**2)))) * (798.8 / 397)
+			else:
+				temp["input"] = deepcopy(ReactParam["Nan"])
+				temp["input"]["EQUIPMENT COST"] = 0
 		# 여기는 이미 가격 계산 되어있으면 계산 안 하는 부분
 		if (key not in exceptCapacity and inputData[key]["EquipmentCost"] != 0): 
 			temp["ATEA"] = {}

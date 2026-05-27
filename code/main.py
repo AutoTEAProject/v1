@@ -1,9 +1,9 @@
 #!/opt/anaconda3/envs/myenv/bin/python
-from Parse import parseTEA, parseHEX, parseCOMP, parseCAPCOSTParam, parseUtility, parseLawMaterial, parseEQUIP, parseLawMaterialExcelData, parseFlowData, parseMPSG, parseMPS
+from Parse import parseTEA, parseHEX, parseCOMP, parseCAPCOSTParam, parseUtility, parseLawMaterial, parseEQUIP, parseLawMaterialExcelData, parseFlowData, parseMPSG, parseMPS , parseReactor
 from Utility import calEquipmentCost, printout, inputRTX
 from Calc import calCAPEX, calUtility, calOPEX, calProfitAnalysis
-from ExcelParse import parseUtilityParam, parseEquipmentParam
-from data import calcOPEXdata
+from ExcelParse import parseUtilityParam, parseEquipmentParam, parsereactorParam
+from data import calcOPEXdata, reactorParam
 
 inputData = {}
 inputfile = "./input/input.xlsx"
@@ -18,11 +18,11 @@ flowData = {}
 exceptUtility = []
 exceptEquipmentcost = []
 exceptCapacity = {}
-
 try:
 	parseUtilityParam()
 	parseEquipmentParam() 
-	parseLawMaterialExcelData(flowData, exceptEquipmentcost, exceptUtility, exceptCapacity)
+	parsereactorParam()
+	parseLawMaterialExcelData(flowData, exceptEquipmentcost, exceptUtility, exceptCapacity, )
 except Exception as e:
 	print("Error parsexlxs:", e)
 try: 
@@ -34,13 +34,14 @@ try:
 	parseUtility(inputData, inputrep, utility, exceptCapacity)
 	parseMPSG(inputData, inputrep, utility)
 	parseMPS(inputData, inputrep, utility)
-	calEquipmentCost(inputData, cost, utility, exceptCapacity)
+	parseReactor(inputData, inputrep, utility)
 
 except Exception as e:
 	print("Error parserep:", e)
 
 try:
-	inputRTX(inputData, cost) # 여기서 reactor 엑셀에 입력하고 읽어오기
+	calEquipmentCost(inputData, cost, utility, exceptCapacity)
+	# inputRTX(inputData, cost) # 여기서 reactor 엑셀에 입력하고 읽어오기
 	calCAPEX(inputData, cost, CAPEX, exceptEquipmentcost)
 	calUtility(utility, exceptUtility)
 	calOPEX(CAPEX, flowData, OPEX, utility)

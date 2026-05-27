@@ -16,6 +16,8 @@ HeaterParam = {}
 
 HeatExchangerParam = {}
 
+reactorParam = {}
+
 CompressorParam = {}
 ReactParam = {"Nan" : {"K1": 0, "K2": 0, "K3": 0}}
 

@@ -4,7 +4,7 @@ import datetime
 import math
 from Utility import checkType, calMaterialWeight
 from enums import Index
-from data import lawMaterialCostData, lawMaterialWeightData, outputFlowData, utilityCostData
+from data import lawMaterialCostData, lawMaterialWeightData, outputFlowData, utilityCostData, reactorParam
 
 def parseFlowData(filename, flowName):
 	fd2 = open(filename, mode='r')
@@ -36,42 +36,6 @@ def parseFlowData(filename, flowName):
 			data[material] = weight
 			return (weight)
 
-
-def parseInputMaterial():
-	filename = "./input/MaterialData.xlsx"
-	df = pd.read_excel(io = filename, sheet_name='input', header=1, engine='openpyxl')
-	length = len(df)
-	for i in range(length):
-		material = df.iat[i, 1]
-		cost = df.iat[i, 2]
-		if (material == ""):
-			break;
-		weight = calMaterialWeight(material)
-		lawMaterialCostData[material] = cost
-		lawMaterialWeightData[material] = weight
-
-def parseOutputMaterial():
-	filename = "./input/MaterialData.xlsx"
-	df = pd.read_excel(io = filename, sheet_name='output', header=1, engine='openpyxl')
-	length = len(df)
-	for i in range(length):
-		material = df.iat[i, 1]
-		cost = df.iat[i, 2]
-		flow = df.iat[i, 3]
-		if (material == ""):
-			break;
-		weight = calMaterialWeight(material)
-		flag = 0
-		lawMaterialCostData[material] = cost
-		lawMaterialWeightData[material] = weight
-		for key in outputFlowData:
-			if key == flow:
-				flag = 1
-				outputFlowData[key].append(material)
-		if flag == 0:
-			outputFlowData[flow] = [];
-			outputFlowData[flow].append(material)
-  # flowName 받아서 이거 따로 저장해야함.
 
 def parseFlowName(flowData):
 	xlsxfilename = "./input/MaterialData.xlsx"
@@ -128,8 +92,6 @@ def parseLawMaterialExcelData(flowData, exceptEquipmentcost, exceptUtility, exce
 	parseFlowName(flowData)
 	parseExceptName(exceptEquipmentcost, exceptUtility)
 	parseCapacity(exceptCapacity)
-	# parseInputMaterial()
-	# parseOutputMaterial()
 
 '''
                                FLOWSHEET SECTION                                
@@ -302,6 +264,65 @@ def parseEQUIP(refFilename, inputData):
 			for key in inputData:
 				if (key == parseName):
 					inputData[key]["Type"] = checkType(blockType)
+					# if (inputData[key]["Type"] == "REACT"):
+					# 	reactorParam.append(inputData[key]["Name"])
+
+
+'''
+ BLOCK:  FURNACE  MODEL: RSTOIC          
+ ------------------------------
+   INLET STREAMS:         AIR         DIST1TOP    LIGHTPUR
+   OUTLET STREAM:         COMBOUT 
+   PROPERTY OPTION SET:   RKS-BM    REDLICH-KWONG-SOAVE EQUATION OF STATE       
+
+                      ***  MASS AND ENERGY BALANCE  ***
+                              IN          OUT       GENERATION   RELATIVE DIFF.
+   TOTAL BALANCE
+   MOLE(KMOL/HR )         12830.3       13120.1       289.853      0.138641E-15
+   MASS(KG/HR   )         374568.       374568.                     0.00000    
+   ENTHALPY(CAL/SEC )   -0.342655E+07 -0.342655E+07                 0.00000    
+'''
+def parseReactor(inputData, repfFileName, utility):
+	fd = open(repfFileName, mode='r')
+	lines = fd.readlines()
+	blockflag = 0
+	startflag = False
+ 
+	for line in lines:
+		if (blockflag == 1):
+			if ("-----------------------" in line):
+				blockflag = 2
+			else:
+				blockflag = 0
+		if (blockflag == 3):
+			blockflag = 0
+			startflag = True
+			continue
+		if (blockflag == 2 and "TOTAL BALANCE" in line):
+			blockflag += 1
+		if (startflag == True):
+			line = line.strip()
+			parts = line.split()
+			temp3 = list(parts[2].split('+'))
+			temp = temp3[0][:-1]
+			print(temp)
+			num = float(temp)
+			if (len(temp3) > 1):
+				for i in range(int(temp3[1])):
+					num *=  10
+			mass = num * 24 / 1000 #ton/day
+			reactorParam[name]["Capacity (Feed) [ton/d]"] = mass
+			startflag = False;
+		if (" BLOCK:  " in line and "MODEL: " in line):
+			line = line.strip()
+			parts = line.split()
+			name = parts[1]
+			for key in reactorParam:
+				if (key == name):
+					blockflag = 1
+					break;
+		
+	print(reactorParam)
 
 def parseMPSG(inputData, repfFileName, utility):
 	fd = open(repfFileName, mode='r')

@@ -1,6 +1,6 @@
 #!/opt/anaconda3/envs/myenv/bin/python
 import pandas as pd
-from data import utilityCostData, calcOPEXdata, profitAnalysisData, HeaterParam, HeatExchangerParam, CompressorParam
+from data import utilityCostData, calcOPEXdata, profitAnalysisData, HeaterParam, HeatExchangerParam, CompressorParam, reactorParam
 
 def parseUtilityParam():
 	filename = "./input/MaterialData.xlsx"
@@ -44,4 +44,22 @@ def parseEquipmentParam():
 		k2 = df.iat[i, 3]
 		k3 = df.iat[i, 4]
 		CompressorParam[key] = {"K1" : k1, "K2" : k2, "K3" : k3}
+
+def parsereactorParam():
+	xlsxfilename = "./input/MaterialData.xlsx"
+	df = pd.read_excel(io = xlsxfilename, sheet_name='Reactor Parameter', header=1, engine='openpyxl')
+	length = len(df)
+	
+	for i in range(length):
+		ReactorName = df.iat[i, 1]
+		k1 = df.iat[i, 2]
+		k2 = df.iat[i, 3]
+		k3 = df.iat[i, 4]
+		if (pd.isna(ReactorName)):
+			break;
+		if (pd.isna(ReactorName) == False):
+			cost = float(df.iat[i, 2])
+			if (pd.isna(k1) or pd.isna(k2) or pd.isna(k3)):
+				raise TypeError("Reactor Parameter의 Parameter를 입력해주세요. : " + ReactorName)
+			reactorParam[ReactorName] = {"K1" : k1, "K2" : k2, "K3" : k3, "Capacity (Feed) [ton/d]" : 0}
 
